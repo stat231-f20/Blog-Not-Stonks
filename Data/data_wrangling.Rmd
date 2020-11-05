@@ -36,9 +36,21 @@ productcodes <- read.csv("/Users/samassaf1/Desktop/Data Science/sam's 231 git/Bl
 #change variable names
 tradedata2018_v1 <- tradedata2018 %>%
   select(c(year=t, product=k, Exporter=i, Importer=j, Value=v, Quantity=q))
-countrycodes_v1 <- countrycodes %>%
-  select(country_code, country_name_full)
-tradedata2018_v2 <- tradedata2018_v1
+
+#export
+countrycodes_v1_export <- countrycodes %>%
+  select(Exporter = country_code, Exporter_Name = country_name_full)
+tradedata2018_export <- inner_join(tradedata2018_v1, countrycodes_v1_export, by = "Exporter")
+
+#import
+countrycodes_v1_import <- countrycodes %>%
+  select(Importer = country_code, Importer_Name = country_name_full)
+tradedata2018_import <- inner_join(tradedata2018_v1, countrycodes_v1_import, by = "Importer")
+
+#combine the code
+tradedata2018_both <-  left_join(tradedata2018_export, tradedata2018_import)
+
+
 
 
 ```
