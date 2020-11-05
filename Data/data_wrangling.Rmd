@@ -23,15 +23,15 @@ library(viridis)
 #t=Year, k=Product category (HS 6-digit code), i=Exporter (ISO 3-digit country code)
 #j=Importer (ISO 3-digit country code), v=Value of the trade flow (in thousands current USD)
 #q=Quantity (in metric tons)
-tradedata2018 <- read.csv("/Users/samassaf1/Desktop/Data Science/sam's 231 git/Blog-Not-Stonks/Data/trade_2018_hs17.csv")
+tradedata2018 <- read.csv("/Users/thainguyen/Desktop/STUDYYYYYYYYYYYYYYYYYYYYYY/College/Fall 2020/Data Science STAT 231/Git/Blog-Not-Stonks/Data/trade_2018_hs17.csv")
 
 #replace with your location of file
 #3-digit country code
-countrycodes <- read.csv("/Users/samassaf1/Desktop/Data Science/sam's 231 git/Blog-Not-Stonks/Data/country_codes.csv")
+countrycodes <- read.csv("/Users/thainguyen/Desktop/STUDYYYYYYYYYYYYYYYYYYYYYY/College/Fall 2020/Data Science STAT 231/Git/Blog-Not-Stonks/Data/country_codes.csv")
 
 #replace with your location of file
 #6-digit code
-productcodes <- read.csv("/Users/samassaf1/Desktop/Data Science/sam's 231 git/Blog-Not-Stonks/Data/product_codes_hs17.csv")
+productcodes <- read.csv("/Users/thainguyen/Desktop/STUDYYYYYYYYYYYYYYYYYYYYYY/College/Fall 2020/Data Science STAT 231/Git/Blog-Not-Stonks/Data/product_codes_hs17.csv")
 
 ```
 
@@ -60,7 +60,7 @@ tradedata2018_export <- inner_join(tradedata2018_v1, countrycodes_v1_export, by 
 countrycodes_v1_import <- countrycodes %>%
   select(Importer = country_code, Importer_Name = country_name_full)
 
-#fix USA's name for import, likely unefficiently
+#fix USA's name for import, likely inefficiently
 country_import_noUSA<- countrycodes_v1_import %>%
   filter(Importer_Name != "USA, Puerto Rico and US Virgin Islands")
 country_import_yesUSA<- countrycodes_v1_import %>%
@@ -75,7 +75,7 @@ tradedata2018_both <- left_join(tradedata2018_export, tradedata2018_import, by =
   select(year, product, Exporter_Name, Importer_Name, Value, Quantity) %>%
   mutate(Exporter_Name = as.character(Exporter_Name), Importer_Name = as.character(Importer_Name))
 
-#try to only keep bigger countries becuase keep getting vector overload
+#try to only keep bigger countries because keep getting vector overload
 wholevalue <- sum(tradedata2018_both$Value)
 
 
@@ -101,7 +101,7 @@ importprop <- tradedata2018_both %>%
 
 world_map <- map_data(map = "world"
                       , region = ".")
-#inner joing world map by exported countries
+#inner join-ing world map by exported countries
 exportgraphdata <- inner_join(world_map, exportprop, by = "region")
 
 #graph for exported percentages
@@ -109,23 +109,44 @@ ggplot(exportgraphdata, aes(x = long, y = lat, group = group, fill = prop)) +
   geom_polygon(color = "grey") +
   theme_void() +
   coord_fixed(ratio = 1.3) +
-  labs(title = "Proportion of Total Amount of Money (in $1000's of US $) a Country Exported", fill = "Percentage of Export", caption = "*Countries in white have no data*") +
+  labs(title = "Each country's contribution to total worldwide export in percentages", fill = "Export Percentage", caption = "*Countries in white have no data*") +
   theme(legend.position="bottom") + 
   scale_fill_viridis(option = "viridis", direction = -1) 
 
-#inner joing world map by imported countries
+#inner joining world map by imported countries
 importgraphdata <- inner_join(world_map, importprop, by = "region")
 
-#graph for exported percentages
 ggplot(importgraphdata, aes(x = long, y = lat, group = group, fill = prop)) +
   geom_polygon(color = "grey") +
   theme_void() +
   coord_fixed(ratio = 1.3) +
-  labs(title = "Proportion of Total Amount of Money (in $1000's of US $) a Country Imported", fill = "Percentage of Export", caption = "*Countries in white have no data*") +
+  labs(title = "Each country's contribution to total worldwide import in percentages", fill = "Import Percentage", caption = "*Countries in white have no data*") +
   theme(legend.position="bottom") + 
   scale_fill_viridis(option = "plasma", direction = -1) 
+```
 
+##Test for other things 
+```{r test}
+library(scales)
+# Export map using value
+test <- exportprop 
+test$Value <- format(test$Value, scientific = FALSE)
+test$Value <- as.numeric(test$Value)
+test <- test %>%
+  mutate(value_mil = Value/1000)
+test$value_mil  <- as.numeric(format(test$value_mil, scientific = FALSE))
 
+testgraphdata <-inner_join(world_map, test, by = "region")
+
+glimpse(test)
+# Export map by volume 
+ggplot(testgraphdata, aes(x = long, y = lat, group = group, fill = value_mil)) +
+  geom_polygon(color = "grey") +
+  theme_void() +
+  coord_fixed(ratio = 1.3) +
+  labs(title = "Export Volume of countries", fill = "Export Volume (in million US$)", caption = "*Countries in white have no data*") +
+  theme(legend.position="bottom") + 
+  scale_fill_viridis(option = "viridis", direction = -1) 
 
 ```
 
