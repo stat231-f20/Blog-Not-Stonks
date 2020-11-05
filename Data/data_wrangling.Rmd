@@ -39,17 +39,36 @@ productcodes <- read.csv("/Users/samassaf1/Desktop/Data Science/sam's 231 git/Bl
 ```{r}
 #change variable names
 tradedata2018_v1 <- tradedata2018 %>%
-  select(c(year=t, product=k, Exporter=i, Importer=j, Value=v, Quantity=q)) %>%
-  case_when(USA, Puerto Rico and US Virgin Islands)
+  select(c(year=t, product=k, Exporter=i, Importer=j, Value=v, Quantity=q))
+
 #export
 countrycodes_v1_export <- countrycodes %>%
   select(Exporter = country_code, Exporter_Name = country_name_full)
+
+#fix USA's name for export, likely unefficiently
+country_export_noUSA<- countrycodes_v1_export %>%
+  filter(Exporter_Name != "USA, Puerto Rico and US Virgin Islands")
+country_export_yesUSA<- countrycodes_v1_export %>%
+  filter(Exporter_Name == "USA, Puerto Rico and US Virgin Islands")%>%
+  mutate(Exporter_Name = "USA")
+countrycodes_v1_export <- full_join(country_export_noUSA, country_export_yesUSA)
+  
+
 tradedata2018_export <- inner_join(tradedata2018_v1, countrycodes_v1_export, by = "Exporter")
 
 #import
 countrycodes_v1_import <- countrycodes %>%
   select(Importer = country_code, Importer_Name = country_name_full)
+
+#fix USA's name for import, likely unefficiently
+country_import_noUSA<- countrycodes_v1_import %>%
+  filter(Importer_Name != "USA, Puerto Rico and US Virgin Islands")
+country_import_yesUSA<- countrycodes_v1_import %>%
+  filter(Importer_Name == "USA, Puerto Rico and US Virgin Islands")%>%
+  mutate(Importer_Name = "USA")
+countrycodes_v1_import <- full_join(country_import_noUSA, country_import_yesUSA)
 tradedata2018_import <- inner_join(tradedata2018_v1, countrycodes_v1_import, by = "Importer")
+
 
 #combine the code so countries by name
 tradedata2018_both <- left_join(tradedata2018_export, tradedata2018_import, by = c("year", "product", "Exporter", "Importer", "Value", "Quantity")) %>%
@@ -82,8 +101,6 @@ importprop <- tradedata2018_both %>%
 
 world_map <- map_data(map = "world"
                       , region = ".")
-world_map <- world_map %>%
-  select(c())
 #inner joing world map by exported countries
 exportgraphdata <- inner_join(world_map, exportprop, by = "region")
 
