@@ -47,8 +47,9 @@ countrycodes_v1_import <- countrycodes %>%
   select(Importer = country_code, Importer_Name = country_name_full)
 tradedata2018_import <- inner_join(tradedata2018_v1, countrycodes_v1_import, by = "Importer")
 
-#combine the code
-tradedata2018_both <-  left_join(tradedata2018_export, tradedata2018_import)
+#combine the code so countries by name
+tradedata2018_both <- left_join(tradedata2018_export, tradedata2018_import, by = c("year", "product", "Exporter", "Importer", "Value", "Quantity")) %>%
+  select(year, product, Exporter_Name, Importer_Name, Value, Quantity)
 
 
 
