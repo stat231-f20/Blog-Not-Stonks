@@ -13,6 +13,8 @@ library(maps)
 library(datasets)
 library(gapminder)
 library(viridis)
+library(ggnetwork)
+library(igraph)
 ```
 
 ## Load In Data
@@ -23,15 +25,15 @@ library(viridis)
 #t=Year, k=Product category (HS 6-digit code), i=Exporter (ISO 3-digit country code)
 #j=Importer (ISO 3-digit country code), v=Value of the trade flow (in thousands current USD)
 #q=Quantity (in metric tons)
-tradedata2018 <- read.csv("/Users/thainguyen/Desktop/STUDYYYYYYYYYYYYYYYYYYYYYY/College/Fall 2020/Data Science STAT 231/Git/Blog-Not-Stonks/Data/trade_2018_hs17.csv")
+tradedata2018 <- read.csv("/Users/samassaf1/Desktop/Data Science/sam's 231 git/Blog-Not-Stonks/Data/trade_2018_hs17.csv")
 
 #replace with your location of file
 #3-digit country code
-countrycodes <- read.csv("/Users/thainguyen/Desktop/STUDYYYYYYYYYYYYYYYYYYYYYY/College/Fall 2020/Data Science STAT 231/Git/Blog-Not-Stonks/Data/country_codes.csv")
+countrycodes <- read.csv("/Users/samassaf1/Desktop/Data Science/sam's 231 git/Blog-Not-Stonks/Data/country_codes.csv")
 
 #replace with your location of file
 #6-digit code
-productcodes <- read.csv("/Users/thainguyen/Desktop/STUDYYYYYYYYYYYYYYYYYYYYYY/College/Fall 2020/Data Science STAT 231/Git/Blog-Not-Stonks/Data/product_codes_hs17.csv")
+productcodes <- read.csv("/Users/samassaf1/Desktop/Data Science/sam's 231 git/Blog-Not-Stonks/Data/product_codes_hs17.csv")
 
 ```
 
@@ -78,15 +80,14 @@ tradedata2018_both <- left_join(tradedata2018_export, tradedata2018_import, by =
 #try to only keep bigger countries because keep getting vector overload
 wholevalue <- sum(tradedata2018_both$Value)
 
-
-#proportion of total value country export
+#proportion of total value country export, value and prop
 exportprop <- tradedata2018_both %>%
   select(year, region = Exporter_Name, Value) %>%
   group_by(year, region) %>%
   summarize(Value = sum(Value)) %>%
   mutate(prop = 100*(Value/wholevalue))
 
-#proportion of total value country import
+#proportion of total value country import, value and prop
 importprop <- tradedata2018_both %>%
   select(year, region = Importer_Name, Value) %>%
   group_by(year, region) %>%
@@ -104,7 +105,7 @@ world_map <- map_data(map = "world"
 #inner join-ing world map by exported countries
 exportgraphdata <- inner_join(world_map, exportprop, by = "region")
 
-#graph for exported percentages
+#colored graph for exported percentages
 ggplot(exportgraphdata, aes(x = long, y = lat, group = group, fill = prop)) +
   geom_polygon(color = "grey") +
   theme_void() +
@@ -116,6 +117,7 @@ ggplot(exportgraphdata, aes(x = long, y = lat, group = group, fill = prop)) +
 #inner joining world map by imported countries
 importgraphdata <- inner_join(world_map, importprop, by = "region")
 
+#colored graph for imported percentages
 ggplot(importgraphdata, aes(x = long, y = lat, group = group, fill = prop)) +
   geom_polygon(color = "grey") +
   theme_void() +
@@ -123,7 +125,16 @@ ggplot(importgraphdata, aes(x = long, y = lat, group = group, fill = prop)) +
   labs(title = "Each country's contribution to total worldwide import in percentages", fill = "Import Percentage", caption = "*Countries in white have no data*") +
   theme(legend.position="bottom") + 
   scale_fill_viridis(option = "plasma", direction = -1) 
+
+
+#try for arrows, but work on this weekend
+#tradedata2018_both_direct <- graph_from_edgelist(as.matrix(tradedata2018_both[,3:4]), directed = TRUE)
+#
+#ggplot(data = ggnetwork(tradedata2018_both_direct), aes(x = x, y = y, xend = xend, yend = yend)) + geom_edges(arrow=arrow(type="closed", #length=unit(6,"pt"))
+#            , color = "lightgray") + geom_nodes() + geom_nodelabel(aes(label = name)) + theme_blank()
 ```
+
+
 
 ##Test for other things 
 ```{r test}
