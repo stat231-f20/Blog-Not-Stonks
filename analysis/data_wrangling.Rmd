@@ -19,22 +19,42 @@ library(igraph)
 
 ## Load In Data
 
+```{r}
+# TRADE DATA SET UP ----------------------------------------------------------------------
+# For reproducibility, run once the first time you open it, and again only if you delete 
+# the files
+
+# trade flow data url
+URL <- "http://www.cepii.fr/DATA_DOWNLOAD/baci/trade_flows/BACI_HS17_V202001.zip"
+
+# create a file on the user's desktop 
+download.file(url = URL, destfile = "~/Desktop/trade_flows.zip")
+
+# unzip the file 
+tradeflows <- unzip("~/Desktop/trade_flows.zip", exdir = "~/Desktop")
+```
+
 
 ```{r}
-#replace with your location of file
+# READ IN DATA ---------------------------------------------------------------------------
+
 #t=Year, k=Product category (HS 6-digit code), i=Exporter (ISO 3-digit country code)
 #j=Importer (ISO 3-digit country code), v=Value of the trade flow (in thousands current USD)
 #q=Quantity (in metric tons)
-tradedata2018 <- read.csv("/Users/samassaf1/Desktop/Data Science/sam's 231 git/Blog-Not-Stonks/Data/trade_2018_hs17.csv")
 
-#replace with your location of file
-#3-digit country code
-countrycodes <- read.csv("/Users/samassaf1/Desktop/Data Science/sam's 231 git/Blog-Not-Stonks/Data/country_codes.csv")
+# read in trade flow data 
+read_csv(tradeflows)
 
-#replace with your location of file
-#6-digit code
-productcodes <- read.csv("/Users/samassaf1/Desktop/Data Science/sam's 231 git/Blog-Not-Stonks/Data/product_codes_hs17.csv")
+# read in country code data 
+countrycodes <- read.csv("../data sets/country_codes.csv")
 
+# read in product code data 
+productcodes <- read.csv("../data sets/product_codes.csv")
+
+```
+
+```{r}
+# DATA WRANGLING -------------------------------------------------------------------------
 ```
 
 ##Mutating Data
