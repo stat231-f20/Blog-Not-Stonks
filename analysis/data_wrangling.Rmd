@@ -69,8 +69,10 @@ trade_2018 <- trade_flow %>%
          quantity = q) %>%
   # year is always 2018 - unnecessary 
   select(-year) %>%
+  # add exporter country names 
   left_join(countries, by = c("exporter_code" = "country_code")) %>%
   rename(exporter_name = country_name_full) %>%
+  # add importer country names 
   left_join(countries, by = c("importer_code" = "country_code")) %>%
   rename(importer_name = country_name_full)
 
@@ -83,7 +85,6 @@ trade_imports <- trade_2018 %>%
   select(c(product, value, quantity, importer_code, importer_name))
 
 # proportion data sets 
-
 whole_value <- sum(trade_2018$value)
 
 export_prop <- trade_exports %>%
