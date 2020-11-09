@@ -58,8 +58,9 @@ countries <- country_codes %>%
   select(country_code, country_name_full) 
 
 # recode levels to match with world map later (not entirely complete, add more if noticed)
-countries$country_name_full <- recode(countries$country_name_full, 
-                                      "USA" = "USA, Puerto Rico and US Virgin Islands")
+countries$country_name_full <- recode(factor(countries$country_name_full), 
+                                      "USA, Puerto Rico and US Virgin Islands" = "USA", 
+                                      "Plurinational State of Bolivia" = "Bolivia")
 
 
 # master data set with exports and imports (might be useful for networks)
