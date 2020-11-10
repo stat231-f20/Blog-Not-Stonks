@@ -16,6 +16,8 @@ library(viridis)
 library(ggnetwork)
 library(igraph)
 library(leaflet)
+library(igraph)
+
 ```
 
 ## Read In Data
@@ -159,7 +161,29 @@ leaflet(world) %>%
 
 
 
+## Network
+```{r network}
+# Getting trade between countries 
+trade_network <- trade_2018 %>%
+  select(value, exporter_name, importer_name) %>%
+  group_by(exporter_name, importer_name) %>%
+  summarize(total_trade = sum(value)) 
 
+# Create network graph (currently too crowded)
+trade_network_data <- graph_from_data_frame(trade_network
+                                   , directed = TRUE)
+summary(trade_network_data)
+
+trade_network_graph <- ggnetwork(trade_network_data)
+
+ggplot(data = trade_network_graph
+       , aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_edges(arrow=arrow(type="closed", length=unit(6,"pt"))
+            , color = "lightgray") +
+  geom_nodes() +
+  geom_nodelabel(aes(label = name)) +
+  theme_blank()
+```
 
 
 
