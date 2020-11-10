@@ -1,6 +1,6 @@
 ---
 title: "data_wrangling"
-output: pdf_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -15,11 +15,12 @@ library(gapminder)
 library(viridis)
 library(ggnetwork)
 library(igraph)
+library(leaflet)
 ```
 
 ## Read In Data
 
-```{r}
+```{r, eval = F}
 # TRADE DATA SET UP ----------------------------------------------------------------------
 # Run once the first time you open it, and never again unless you delete the files
 
@@ -60,7 +61,14 @@ countries <- country_codes %>%
 # recode levels to match with world map later (not entirely complete, add more if noticed)
 countries$country_name_full <- recode(factor(countries$country_name_full), 
                                       "USA, Puerto Rico and US Virgin Islands" = "USA", 
-                                      "Plurinational State of Bolivia" = "Bolivia")
+                                      "Plurinational State of Bolivia" = "Bolivia", 
+                                      "Russian Federation" = "Russia", 
+                                      "France, Monaco" = "France",
+                                      "Southern African Customs Union" = "South Africa", 
+                                      "Viet Nam" = "Vietnam", 
+                                      "United Republic of Tanzania" = "Tanzania", 
+                                      "United Kingdom" = "UK", 
+                                      "Norway, Svalbard and Jan Mayen" = "Norway")
 
 
 # master data set with exports and imports (might be useful for networks)
@@ -97,9 +105,67 @@ import_prop <- trade_imports %>%
   summarize(import_pct = 100*(sum(value)/whole_value))
 ```
 
-# Rough Graphs 
+## Interactivity With Leaflet
+
 
 ```{r}
+# MAP SETUP ------------------------------------------------------------------------------
+
+world <- map("world", fill = TRUE, plot = FALSE)
+
+world$names <- str_replace(world$names, pattern = ":.*$", replacement = "")
+
+# EXPORT MAP -----------------------------------------------------------------------------
+
+export_pct_named <- export_prop$export_pct
+names(export_pct_named) <- export_prop$exporter_name
+
+world$export_pct <- export_pct_named[world$names]
+
+mypalette <- colorNumeric(palette = "viridis", domain = world$export_pct, 
+                           na.color = "transparent")
+
+leaflet(world) %>%
+  addTiles() %>%
+  setView(lat=10, lng=0 , zoom=2) %>%
+  addPolygons(color = "white", fillColor = ~mypalette(export_pct), weight = 1) %>%
+  addLegend(pal = mypalette, values = ~export_pct, 
+            title = "Export Percent", position = "bottomleft")
+
+# IMPORT MAP -----------------------------------------------------------------------------
+
+import_pct_named <- import_prop$import_pct
+names(import_pct_named) <- import_prop$importer_name
+
+world$import_pct <- import_pct_named[world$names]
+
+mypalette <- colorNumeric(palette = "viridis", domain = world$import_pct, 
+                           na.color = "transparent")
+
+leaflet(world) %>%
+  addTiles() %>%
+  setView(lat=10, lng=0 , zoom=2) %>%
+  addPolygons(color = "white", fillColor = ~mypalette(import_pct), weight = 1) %>%
+  addLegend(pal = mypalette, values = ~import_pct, 
+            title = "Import Percent", position = "bottomleft")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Rough Graphs 
+
+```{r, eval = F}
 # read in world map data from the maps package 
 world_map <- map_data(map = "world", region = ".")
 
@@ -149,7 +215,6 @@ ggplot(import_data, aes(x = long, y = lat, group = group, fill = import_pct)) +
 #            , color = "lightgray") + geom_nodes() + geom_nodelabel(aes(label = name)) + 
 #theme_blank()
 ```
-
 
 ##Test for other things 
 ```{r test}
