@@ -235,11 +235,36 @@ clust_2_network_graph <- ggnetwork(clust_2_network_data)
 
 ggplot(data = clust_2_network_graph
        , aes(x = x, y = y, xend = xend, yend = yend)) +
-  geom_edges(arrow=arrow(type="closed", length=unit(6,"pt"))
-            , color = "lightgray") +
+  geom_edges(aes(color = total_trade), arrow = arrow(type = "closed", length = unit(6,"pt")), 
+             curvature = 0.1, size = 0.8)  +
   geom_nodes() +
   geom_nodelabel(aes(label = name)) +
-  theme_blank()
+  theme_blank() +
+  labs(title = "Network for countries in cluster 2", 
+       color = "2017 trade volume") +
+  scale_color_continuous(type = "viridis")
+
+# See network within cluster 4
+clust_4_network <- trade_network_clust %>%
+  filter(clust_ex == 4) %>%
+  filter(clust_im == 4)
+
+
+clust_4_network_data <- graph_from_data_frame(clust_4_network
+                                   , directed = TRUE)
+
+clust_4_network_graph <- ggnetwork(clust_4_network_data)
+
+ggplot(data = clust_4_network_graph
+       , aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_edges(aes(color = total_trade), arrow = arrow(type = "closed", length = unit(6,"pt")), 
+             curvature = 0.1, size = 0.8)  +
+  geom_nodes() +
+  geom_nodelabel(aes(label = name)) +
+  theme_blank() +
+  labs(title = "Network for countries in cluster 4", 
+       color = "2017 trade volume") +
+  scale_color_continuous(type = "viridis")
 ```
 
 
