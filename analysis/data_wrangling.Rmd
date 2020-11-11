@@ -17,6 +17,8 @@ library(ggnetwork)
 library(igraph)
 library(leaflet)
 library(igraph)
+library(ggrepel)
+library(GGally)
 
 ```
 
@@ -154,7 +156,34 @@ leaflet(world) %>%
 
 
 
+## Unsupervised learning
+```{r unsup}
+# Combine export + import data for clustering
+trade_combine <- export_prop %>%
+  inner_join(import_prop, by = c("exporter_name" = "importer_name")) %>%
+  rename(country = exporter_name)
 
+# Use k-means clustering to identify 4 clusters based on contribution in terms of export and import to world trade
+set.seed(100)
+vars <- c("export_pct" , "import_pct")
+km_trade <- kmeans(trade_combine[,vars], centers=4, nstart=20)
+
+trade_combine_clust4 <- trade_combine %>%
+  mutate(clust4 = as.character(km_trade$cluster))
+
+# visualize the cluster assignments and centroids
+ggplot(data = trade_combine_clust4, aes(x = import_pct, y = export_pct)) + 
+  geom_point(aes(color = clust4)) +
+  coord_fixed() +
+  geom_point(data = as.data.frame(km_trade$centers)
+             , aes(x = import_pct, y = export_pct)
+             , pch = "X"
+             , size = 4) +
+  labs(x = "Import percentage of world import"
+       , y = "Export percentage of world export" 
+       , color = "Cluster Assignment")
+
+```
 
 
 
@@ -177,6 +206,34 @@ summary(trade_network_data)
 trade_network_graph <- ggnetwork(trade_network_data)
 
 ggplot(data = trade_network_graph
+       , aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_edges(arrow=arrow(type="closed", length=unit(6,"pt"))
+            , color = "lightgray") +
+  geom_nodes() +
+  geom_nodelabel(aes(label = name)) +
+  theme_blank()
+
+# Matching with clusters for better information
+trade_network_clust <- trade_network %>%
+  left_join(trade_combine_clust4, by = c("exporter_name" = "country")) %>%
+  rename(clust_ex = clust4) %>%
+  select(exporter_name, importer_name, total_trade, clust_ex) %>%
+  left_join(trade_combine_clust4, by = c("importer_name" = "country")) %>%
+  rename(clust_im = clust4) %>%
+  select(exporter_name, importer_name, total_trade, clust_ex, clust_im) 
+
+# See network within cluster 2
+clust_2_network <- trade_network_clust %>%
+  filter(clust_ex == 2) %>%
+  filter(clust_im == 2)
+
+
+clust_2_network_data <- graph_from_data_frame(clust_2_network
+                                   , directed = TRUE)
+
+clust_2_network_graph <- ggnetwork(clust_2_network_data)
+
+ggplot(data = clust_2_network_graph
        , aes(x = x, y = y, xend = xend, yend = yend)) +
   geom_edges(arrow=arrow(type="closed", length=unit(6,"pt"))
             , color = "lightgray") +
