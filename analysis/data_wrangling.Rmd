@@ -163,17 +163,40 @@ trade_combine <- export_prop %>%
   inner_join(import_prop, by = c("exporter_name" = "importer_name")) %>%
   rename(country = exporter_name)
 
-# Use k-means clustering to identify 4 clusters based on contribution in terms of export and import to world trade
+# Testing optimal number of clusters
+fig <- matrix(NA, nrow=10, ncol=2)
+set.seed(75)
+for (i in 1:10){
+  fig[i,1] <- i
+  fig[i,2] <- kmeans(trade_combine[,2:3]
+                    , centers=i
+                    , nstart=20)$tot.withinss
+}
+
+ggplot(data = as.data.frame(fig), aes(x = V1, y = V2)) +
+  geom_point() + 
+  geom_line() +
+  scale_x_continuous(breaks=c(1:10)) +
+  labs(x = "K", y = expression("Total W"[k]))
+
+ggplot(data = as.data.frame(fig[2:10,]), aes(x = V1, y = V2)) +
+  geom_point() + 
+  geom_line() +
+  scale_x_continuous(breaks=c(1:10)) +
+  labs(x = "K", y = expression("Total W"[k]))
+
+# Seems like 3 clusters are best
+# Use k-means clustering to identify 3 clusters based on contribution in terms of export and import to world trade
 set.seed(100)
 vars <- c("export_pct" , "import_pct")
-km_trade <- kmeans(trade_combine[,vars], centers=4, nstart=20)
+km_trade <- kmeans(trade_combine[,vars], centers=3, nstart=20)
 
-trade_combine_clust4 <- trade_combine %>%
-  mutate(clust4 = as.character(km_trade$cluster))
+trade_combine_clust3 <- trade_combine %>%
+  mutate(clust3 = as.character(km_trade$cluster))
 
 # visualize the cluster assignments and centroids
-ggplot(data = trade_combine_clust4, aes(x = import_pct, y = export_pct)) + 
-  geom_point(aes(color = clust4)) +
+ggplot(data = trade_combine_clust3, aes(x = import_pct, y = export_pct)) + 
+  geom_point(aes(color = clust3)) +
   coord_fixed() +
   geom_point(data = as.data.frame(km_trade$centers)
              , aes(x = import_pct, y = export_pct)
@@ -215,11 +238,11 @@ ggplot(data = trade_network_graph
 
 # Matching with clusters for better information
 trade_network_clust <- trade_network %>%
-  left_join(trade_combine_clust4, by = c("exporter_name" = "country")) %>%
-  rename(clust_ex = clust4) %>%
+  left_join(trade_combine_clust3, by = c("exporter_name" = "country")) %>%
+  rename(clust_ex = clust3) %>%
   select(exporter_name, importer_name, total_trade, clust_ex) %>%
-  left_join(trade_combine_clust4, by = c("importer_name" = "country")) %>%
-  rename(clust_im = clust4) %>%
+  left_join(trade_combine_clust3, by = c("importer_name" = "country")) %>%
+  rename(clust_im = clust3) %>%
   select(exporter_name, importer_name, total_trade, clust_ex, clust_im) 
 
 # See network within cluster 2
@@ -244,25 +267,25 @@ ggplot(data = clust_2_network_graph
        color = "2017 trade volume") +
   scale_color_continuous(type = "viridis")
 
-# See network within cluster 4
-clust_4_network <- trade_network_clust %>%
-  filter(clust_ex == 4) %>%
-  filter(clust_im == 4)
+# See network within cluster 3 (not super useful bc there are too many countries within this)
+clust_3_network <- trade_network_clust %>%
+  filter(clust_ex == 3) %>%
+  filter(clust_im == 3)
 
 
-clust_4_network_data <- graph_from_data_frame(clust_4_network
+clust_3_network_data <- graph_from_data_frame(clust_3_network
                                    , directed = TRUE)
 
-clust_4_network_graph <- ggnetwork(clust_4_network_data)
+clust_3_network_graph <- ggnetwork(clust_3_network_data)
 
-ggplot(data = clust_4_network_graph
+ggplot(data = clust_3_network_graph
        , aes(x = x, y = y, xend = xend, yend = yend)) +
   geom_edges(aes(color = total_trade), arrow = arrow(type = "closed", length = unit(6,"pt")), 
              curvature = 0.1, size = 0.8)  +
   geom_nodes() +
   geom_nodelabel(aes(label = name)) +
   theme_blank() +
-  labs(title = "Network for countries in cluster 4", 
+  labs(title = "Network for countries in cluster 3", 
        color = "2017 trade volume") +
   scale_color_continuous(type = "viridis")
 ```
@@ -322,31 +345,7 @@ ggplot(import_data, aes(x = long, y = lat, group = group, fill = import_pct)) +
 #theme_blank()
 ```
 
-##Test for other things 
-```{r test}
-library(scales)
-# Export map using value
-test <- export_prop %>%
-  rename(region = exporter_name)
-test$Value <- format(test$Value, scientific = FALSE)
-test$Value <- as.numeric(test$Value)
-test <- test %>%
-  mutate(value_mil = Value/1000)
-test$value_mil  <- as.numeric(format(test$value_mil, scientific = FALSE))
 
-testgraphdata <-inner_join(world_map, test, by = "region")
-
-glimpse(test)
-# Export map by volume 
-ggplot(testgraphdata, aes(x = long, y = lat, group = group, fill = value_mil)) +
-  geom_polygon(color = "grey") +
-  theme_void() +
-  coord_fixed(ratio = 1.3) +
-  labs(title = "Export Volume of countries", fill = "Export Volume (in million US$)", caption = "*Countries in white have no data*") +
-  theme(legend.position="bottom") + 
-  scale_fill_viridis(option = "viridis", direction = -1) 
-
-```
 
 
 
