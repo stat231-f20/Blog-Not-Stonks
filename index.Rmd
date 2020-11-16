@@ -9,10 +9,8 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 library(tidyverse)
 library(evaluate)
-#library(rmarkdown)
 library(janitor)
 library(lubridate)
 library(maps)
@@ -26,39 +24,18 @@ library(igraph)
 library(ggrepel)
 library(GGally)
 library(visNetwork)
+
+knitr::opts_chunk$set(echo = TRUE, 
+                      fig.align="center", 
+                      message = FALSE, 
+                      warning = FALSE, 
+                      comment = NA, 
+                      echo = FALSE)
 ```
 
-# Leah's Turn
 
-## Header 2
-
-### Header 3
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For example, you can include **Bold** and _Italic_ and `Code` text.  For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-You should test out updating your GitHub Pages website:
-
-- clone your group's blog project repo in RStudio
-- update "Your Project Title Here" to a new title in the YAML header
-- knit `index.Rmd` 
-- commit and push BOTH the `index.Rmd` and the `index.html` files
-- go to https://stat231-f20.github.io/Blog-Not-Stonks/ to see the published test document (this is publicly available!)
-
-## Including code and plots
-
-You can embed code as normal, for example:
-
-```{r cars}
-summary(cars)
-```
-
-Let's clean up the format of that output:
-
-```{r pretty, echo=FALSE, warning=FALSE, message=FALSE}
-
-```
-##FIRST TRY
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
+## FIRST TRY
+```{r, eval = F}
 # TRADE DATA SET UP ----------------------------------------------------------------------
 # Run once the first time you open it, and never again unless you delete the files
 
@@ -67,7 +44,9 @@ URL <- "http://www.cepii.fr/DATA_DOWNLOAD/baci/trade_flows/BACI_HS17_V202001.zip
 
 # create a file on the user's desktop 
 download.file(url = URL, destfile = "~/Desktop/trade_flows.zip")
+```
 
+```{r}
 # DATA READ IN ---------------------------------------------------------------------------
 
 # unzip the file and save the .csv to the user's desktop
@@ -77,11 +56,13 @@ tradeflows <- unzip("~/Desktop/trade_flows.zip", exdir = "~/Desktop")
 trade_flow <- read_csv(tradeflows)
 
 # read in country code data 
-country_codes <- read.csv("../data sets/country_codes.csv")
+country_codes <- read.csv("data sets/country_codes.csv")
 
 # read in product code data 
-product_codes <- read.csv("../data sets/product_codes.csv")
+product_codes <- read.csv("data sets/product_codes.csv")
+```
 
+```{r}
 # DATA WRANGLING -------------------------------------------------------------------------
 
 # remove extraneous variables 
@@ -133,13 +114,17 @@ export_prop <- trade_exports %>%
 import_prop <- trade_imports %>%
   group_by(importer_name) %>%
   summarize(import_pct = 100*(sum(value)/whole_value))
+```
 
+```{r}
 # MAP SETUP ------------------------------------------------------------------------------
 
 world <- map("world", fill = TRUE, plot = FALSE)
 
 world$names <- str_replace(world$names, pattern = ":.*$", replacement = "")
+```
 
+```{r exports}
 # EXPORT MAP -----------------------------------------------------------------------------
 
 export_pct_named <- export_prop$export_pct
@@ -157,24 +142,6 @@ leaflet(world) %>%
   addLegend(pal = mypalette, values = ~export_pct, 
             title = "Export Percent", position = "bottomleft")
 ```
-In a study from the 1920s, fifty cars were used to see how the speed of the car and the distance taken to stop were related.  Speeds ranged between `r min(cars$speed)` and `r max(cars$speed)` mph.  Distances taken to stop ranged between `r min(cars$dist)` and `r max(cars$dist)` feet, with the middle 50% falling between `r as.numeric(quantile(cars$dist)[2])` and `r as.numeric(quantile(cars$dist)[4])` feet.  
-
-You can also embed plots as normal, for example:
-
-```{r figure1, echo=FALSE}
-ggplot(data = cars, aes(x = speed, y = dist)) + 
-  geom_point() + 
-  labs(x = "Speed of car (mph)"
-       , y = "Distance taken to stop (ft)"
-       , title = "cars data (1920s)")
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
-
-## Including links and images
-
-You can include [Links](https://www.datadreaming.org/post/r-markdown-theme-gallery/) and images ![team logo](https://raw.githubusercontent.com/stat231-f20/Blog-Not-Stonks/main/images/finance1-3.png)
 
 
 # You can even create tabs if you want! {.tabset .tabset-fade .tabset-pills}
