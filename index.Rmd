@@ -2,8 +2,8 @@
 title: "International Trade"
 author: "Leah, Sam, Thai"
 date: "11/19/20"
-output:
-  rmdformats::readthedown:
+output: 
+  rmdformats::material:
     thumbnails: false
     highlight: NULL
 ---
@@ -24,6 +24,7 @@ library(igraph)
 library(ggrepel)
 library(GGally)
 library(visNetwork)
+library(rmarkdown)
 
 knitr::opts_chunk$set(echo = TRUE, 
                       fig.align="center", 
@@ -126,12 +127,40 @@ world$names <- str_replace(world$names, pattern = ":.*$", replacement = "")
 ```
 
 
+```{r unsup}
+# Combine export + import data for clustering
+trade_combine <- export_prop %>%
+  inner_join(import_prop, by = c("exporter_name" = "importer_name")) %>%
+  rename(country = exporter_name)
+
+# Testing optimal number of clusters
+fig <- matrix(NA, nrow=10, ncol=2)
+set.seed(75)
+for (i in 1:10){
+  fig[i,1] <- i
+  fig[i,2] <- kmeans(trade_combine[,2:3]
+                    , centers=i
+                    , nstart=20)$tot.withinss
+}
 
 
-# Interactive Graphs {.tabset .tabset-fade .tabset-pills}
+# Seems like 3 clusters are best
+# Use k-means clustering to identify 3 clusters based on contribution in terms of export and import to world trade
+set.seed(100)
+vars <- c("export_pct" , "import_pct")
+km_trade <- kmeans(trade_combine[,vars], centers=3, nstart=20)
 
-## Infortmation
+trade_combine_clust3 <- trade_combine %>%
+  mutate(clust3 = as.character(km_trade$cluster))
 
+
+```
+
+
+# Background Infortmation {.tabset .tabset-fade .tabset-pills}
+
+
+# Interactive Spaitial Graphs {.tabset .tabset-fade .tabset-pills}
 
 ## Interactive Export Spatial Data
 
@@ -177,21 +206,110 @@ leaflet(world) %>%
 
 
 
-
-You can make a bulleted list like this:
-
-- item 1
-- item 2
-- item 3
-
-###try this
+# Interactive Clustered Network Graphs {.tabset .tabset-fade .tabset-pills}
 
 
-## Numbered list
+## Cluster 2 Networks
+
+```{r interactive clustered 2 networks}
+# Getting trade between countries 
+trade_network <- trade_2018 %>%
+  select(value, exporter_name, importer_name) %>%
+  group_by(exporter_name, importer_name) %>%
+  summarize(total_trade = sum(value)) 
+
+# Create network graph (currently too crowded)
+trade_network_data <- graph_from_data_frame(trade_network
+                                   , directed = TRUE)
+#summary(trade_network_data)
+
+trade_network_graph <- ggnetwork(trade_network_data)
+
+
+# Matching with clusters for better information
+trade_network_clust <- trade_network %>%
+  left_join(trade_combine_clust3, by = c("exporter_name" = "country")) %>%
+  rename(clust_ex = clust3) %>%
+  select(exporter_name, importer_name, total_trade, clust_ex) %>%
+  left_join(trade_combine_clust3, by = c("importer_name" = "country")) %>%
+  rename(clust_im = clust3) %>%
+  select(exporter_name, importer_name, total_trade, clust_ex, clust_im) 
+
+# See network within cluster 2
+clust_2_network <- trade_network_clust %>%
+  filter(clust_ex == 2) %>%
+  filter(clust_im == 2)
+
+
+clust_2_network_data <- graph_from_data_frame(clust_2_network
+                                   , directed = TRUE)
+
+clust_2_network_graph <- ggnetwork(clust_2_network_data)
+
+
+# See network within cluster 3 (not super useful bc there are too many countries within this)
+clust_3_network <- trade_network_clust %>%
+  filter(clust_ex == 3) %>%
+  filter(clust_im == 3)
+
+
+clust_3_network_data <- graph_from_data_frame(clust_3_network
+                                   , directed = TRUE)
+
+clust_3_network_graph <- ggnetwork(clust_3_network_data)
+
+# function for an interactive network 
+# thickness corresponds to the volume of trade
+# you can pull the nodes towards the edge to better see the graph
+# click on a node to highlight its exports
+make_network <- function(network) {
+  
+  c.factor <- function(..., recursive=TRUE) unlist(list(...), recursive=recursive)
+  
+  name_vec <- name_vec <- c.factor(unique(c.factor(unique(network$exporter_name), 
+                     unique(network$importer_name))))
+  
+  from <- network$exporter_name
+  to <- network$importer_name
+  trade <- network$total_trade
+  
+  
+  edges <- data.frame(from = from, to = to, value = trade)
+  nodes <- data.frame(id = name_vec, label = name_vec, group = name_vec)
+
+  visNetwork(nodes, edges, height = "500px", width = "100%")  %>% 
+    visNodes(shape = "dot") %>%  
+    visEdges(arrows = "to", arrowStrikethrough = F, smooth = T, physics = F) %>%
+    visOptions(highlightNearest = list(enabled = T, degree = 0)) %>%
+  visLayout(randomSeed = 17)
+
+}
+
+make_network(clust_2_network) 
+```
+
+
+## Cluster 3 Networks
+
+```{r interactive clustered 3 networks}
+make_network(clust_3_network)
+```
+
+
+
+# Example {.tabset .tabset-fade .tabset-pills}
+
+## Examples
 
 You can make a numbered list like this
 
 1. First thing I want to say
 2. Second thing I want to say
 3. Third thing I want to say
+
+You can make a bulleted list like this:
+
+- item 1
+- item 2
+- item 3
 
