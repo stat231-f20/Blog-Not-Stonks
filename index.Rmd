@@ -13,6 +13,19 @@ knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 library(tidyverse)
 library(evaluate)
 #library(rmarkdown)
+library(janitor)
+library(lubridate)
+library(maps)
+library(datasets)
+library(gapminder)
+library(viridis)
+library(ggnetwork)
+library(igraph)
+library(leaflet)
+library(igraph)
+library(ggrepel)
+library(GGally)
+library(visNetwork)
 ```
 
 # Leah's Turn
@@ -51,7 +64,106 @@ summary(cars) %>%
   row_spec(0, bold = T, underline = T) %>%
   column_spec(1:2, width = "1.5in") 
 ```
+##FIRST TRY
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# TRADE DATA SET UP ----------------------------------------------------------------------
+# Run once the first time you open it, and never again unless you delete the files
 
+# trade flow data url
+URL <- "http://www.cepii.fr/DATA_DOWNLOAD/baci/trade_flows/BACI_HS17_V202001.zip"
+
+# create a file on the user's desktop 
+download.file(url = URL, destfile = "~/Desktop/trade_flows.zip")
+
+# DATA READ IN ---------------------------------------------------------------------------
+
+# unzip the file and save the .csv to the user's desktop
+tradeflows <- unzip("~/Desktop/trade_flows.zip", exdir = "~/Desktop")
+
+# read in trade flow data 
+trade_flow <- read_csv(tradeflows)
+
+# read in country code data 
+country_codes <- read.csv("../data sets/country_codes.csv")
+
+# read in product code data 
+product_codes <- read.csv("../data sets/product_codes.csv")
+
+# DATA WRANGLING -------------------------------------------------------------------------
+
+# remove extraneous variables 
+countries <- country_codes %>%
+  select(country_code, country_name_full) 
+
+# recode levels to match with world map later (not entirely complete, add more if noticed)
+countries$country_name_full <- recode(factor(countries$country_name_full), 
+                                      "USA, Puerto Rico and US Virgin Islands" = "USA", 
+                                      "Plurinational State of Bolivia" = "Bolivia", 
+                                      "Russian Federation" = "Russia", 
+                                      "France, Monaco" = "France",
+                                      "Southern African Customs Union" = "South Africa", 
+                                      "Viet Nam" = "Vietnam", 
+                                      "United Republic of Tanzania" = "Tanzania", 
+                                      "United Kingdom" = "UK", 
+                                      "Norway, Svalbard and Jan Mayen" = "Norway")
+
+
+# master data set with exports and imports (might be useful for networks)
+trade_2018 <- trade_flow %>%
+         # make variable names descriptive
+  rename(year = t, product = k, exporter_code = i, importer_code = j, value = v, 
+         quantity = q) %>%
+  # year is always 2018 - unnecessary 
+  select(-year) %>%
+  # add exporter country names 
+  left_join(countries, by = c("exporter_code" = "country_code")) %>%
+  rename(exporter_name = country_name_full) %>%
+  # add importer country names 
+  left_join(countries, by = c("importer_code" = "country_code")) %>%
+  rename(importer_name = country_name_full)
+
+# separate data set for exports 
+trade_exports <- trade_2018 %>%
+  select(c(product, value, quantity, exporter_code, exporter_name))
+
+# separate data set for imports 
+trade_imports <- trade_2018 %>%
+  select(c(product, value, quantity, importer_code, importer_name))
+
+# proportion data sets 
+whole_value <- sum(trade_2018$value)
+
+export_prop <- trade_exports %>%
+  group_by(exporter_name) %>%
+  summarize(export_pct = 100*(sum(value)/whole_value))
+
+import_prop <- trade_imports %>%
+  group_by(importer_name) %>%
+  summarize(import_pct = 100*(sum(value)/whole_value))
+
+# MAP SETUP ------------------------------------------------------------------------------
+
+world <- map("world", fill = TRUE, plot = FALSE)
+
+world$names <- str_replace(world$names, pattern = ":.*$", replacement = "")
+
+# EXPORT MAP -----------------------------------------------------------------------------
+
+export_pct_named <- export_prop$export_pct
+names(export_pct_named) <- export_prop$exporter_name
+
+world$export_pct <- export_pct_named[world$names]
+
+mypalette <- colorNumeric(palette = "viridis", domain = world$export_pct, 
+                           na.color = "transparent")
+
+leaflet(world) %>%
+  addTiles() %>%
+  setView(lat=10, lng=0 , zoom=2) %>%
+  addPolygons(color = "white", fillColor = ~mypalette(export_pct), weight = 1) %>%
+  addLegend(pal = mypalette, values = ~export_pct, 
+            title = "Export Percent", position = "bottomleft")
+```
 In a study from the 1920s, fifty cars were used to see how the speed of the car and the distance taken to stop were related.  Speeds ranged between `r min(cars$speed)` and `r max(cars$speed)` mph.  Distances taken to stop ranged between `r min(cars$dist)` and `r max(cars$dist)` feet, with the middle 50% falling between `r as.numeric(quantile(cars$dist)[2])` and `r as.numeric(quantile(cars$dist)[4])` feet.  
 
 You can also embed plots as normal, for example:
