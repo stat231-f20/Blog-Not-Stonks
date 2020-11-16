@@ -19,6 +19,7 @@ library(leaflet)
 library(igraph)
 library(ggrepel)
 library(GGally)
+library(visNetwork)
 
 ```
 
@@ -289,8 +290,43 @@ ggplot(data = clust_3_network_graph
        color = "2017 trade volume") +
   scale_color_continuous(type = "viridis")
 ```
+## Trying Out Some Network Graphs
 
+```{r}
+# function for an interactive network 
+# color corresponds to the node the edge is coming from 
+# thickness corresponds to the volume of trade
+# you can pull the nodes towards the edge to better see the graph
+make_network <- function(network) {
+  
+  c.factor <- function(..., recursive=TRUE) unlist(list(...), recursive=recursive)
+  
+  name_vec <- name_vec <- c.factor(unique(c.factor(unique(network$exporter_name), 
+                     unique(network$importer_name))))
+  
+  from <- network$exporter_name
+  to <- network$importer_name
+  trade <- network$total_trade
+  
+  
+  edges <- data.frame(from = from, to = to, value = trade)
+  nodes <- data.frame(id = name_vec, label = name_vec, group = name_vec)
 
+  visNetwork(nodes, edges, height = "1000px", width = "100%")  %>% 
+    visNodes(shape = "square") %>%  
+    visEdges(arrows = "to", smooth = T, physics = F)  
+
+}
+
+make_network(clust_2_network)
+make_network(clust_3_network)
+```
+
+```{r}
+# more generic graphs but still interactive
+visIgraph(clust_2_network_data)
+visIgraph(clust_3_network_data)
+```
 
 ## Rough Graphs 
 
