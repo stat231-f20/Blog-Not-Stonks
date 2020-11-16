@@ -55,14 +55,7 @@ summary(cars)
 Let's clean up the format of that output:
 
 ```{r pretty, echo=FALSE, warning=FALSE, message=FALSE}
-library(kableExtra)
-summary(cars) %>%
-  kable(col.names = c("Speed", "Distance")
-        , row.names = F) %>%
-  kable_styling(bootstrap_options = "striped"
-                , full_width = F) %>%
-  row_spec(0, bold = T, underline = T) %>%
-  column_spec(1:2, width = "1.5in") 
+
 ```
 ##FIRST TRY
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
