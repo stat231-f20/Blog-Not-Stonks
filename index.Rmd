@@ -126,79 +126,51 @@ world <- map("world", fill = TRUE, plot = FALSE)
 world$names <- str_replace(world$names, pattern = ":.*$", replacement = "")
 ```
 
+# Background Information
 
-```{r unsup}
-# Combine export + import data for clustering
-trade_combine <- export_prop %>%
-  inner_join(import_prop, by = c("exporter_name" = "importer_name")) %>%
-  rename(country = exporter_name)
+# World Exports and Imports {.tabset .tabset-fade .tabset-pills}
 
-# Testing optimal number of clusters
-fig <- matrix(NA, nrow=10, ncol=2)
-set.seed(75)
-for (i in 1:10){
-  fig[i,1] <- i
-  fig[i,2] <- kmeans(trade_combine[,2:3]
-                    , centers=i
-                    , nstart=20)$tot.withinss
-}
-
-
-# Seems like 3 clusters are best
-# Use k-means clustering to identify 3 clusters based on contribution in terms of export and import to world trade
-set.seed(100)
-vars <- c("export_pct" , "import_pct")
-km_trade <- kmeans(trade_combine[,vars], centers=3, nstart=20)
-
-trade_combine_clust3 <- trade_combine %>%
-  mutate(clust3 = as.character(km_trade$cluster))
-
-
-```
-
-
-# Background Infortmation {.tabset .tabset-fade .tabset-pills}
-
-
-# Interactive Spaitial Graphs {.tabset .tabset-fade .tabset-pills}
-
-## Interactive Export Spatial Data
+## Contribution to World Exports by Country
 
 ```{r exports}
 # EXPORT MAP -----------------------------------------------------------------------------
 
+# set up export data 
 export_pct_named <- export_prop$export_pct
 names(export_pct_named) <- export_prop$exporter_name
 
 world$export_pct <- export_pct_named[world$names]
 
+# define a color palette
 mypalette <- colorNumeric(palette = "viridis", domain = world$export_pct, 
                            na.color = "transparent")
 
+# interactive map 
 leaflet(world) %>%
   addTiles() %>%
   setView(lat=10, lng=0 , zoom=2) %>%
+  # overlay export information
   addPolygons(color = "white", fillColor = ~mypalette(export_pct), weight = 1) %>%
   addLegend(pal = mypalette, values = ~export_pct, 
             title = "Export Percent", position = "bottomleft")
 ```
 
-## Interactive Import Spatial Data
+## Contribution to World Imports by Country 
 
 ```{r imports}
 # IMPORT MAP -----------------------------------------------------------------------------
 
+# set up import data 
 import_pct_named <- import_prop$import_pct
 names(import_pct_named) <- import_prop$importer_name
 
 world$import_pct <- import_pct_named[world$names]
 
-mypalette <- colorNumeric(palette = "viridis", domain = world$import_pct, 
-                           na.color = "transparent")
-
+# interactive map
 leaflet(world) %>%
   addTiles() %>%
   setView(lat=10, lng=0 , zoom=2) %>%
+  # overlay import information
   addPolygons(color = "white", fillColor = ~mypalette(import_pct), weight = 1) %>%
   addLegend(pal = mypalette, values = ~import_pct, 
             title = "Import Percent", position = "bottomleft")
@@ -206,27 +178,52 @@ leaflet(world) %>%
 
 
 
-# Interactive Clustered Network Graphs {.tabset .tabset-fade .tabset-pills}
+# Trade Networks {.tabset .tabset-fade .tabset-pills}
 
+```{r unsup}
+# CLUSTERING SETUP -----------------------------------------------------------------------
 
-## Cluster 2 Networks
+# combine export and import data for clustering
+trade_combine <- export_prop %>%
+  inner_join(import_prop, by = c("exporter_name" = "importer_name")) %>%
+  rename(country = exporter_name)
 
-```{r interactive clustered 2 networks}
-# Getting trade between countries 
+vars <- c("export_pct" , "import_pct")
+
+# WSS plot for optimal number of clusters
+wss_plot <- trade_combine %>%
+  select(c(export_pct, import_pct)) %>%
+  factoextra::fviz_nbclust(kmeans, method = "wss")
+
+# Use k-means clustering to identify 3 clusters based on contribution in terms of export 
+# and import to world trade
+
+# K-MEANS CLUSTERING ---------------------------------------------------------------------
+
+# set seed for reproducibility
+set.seed(100)
+
+km_trade <- trade_combine %>%
+  select(c(export_pct, import_pct)) %>%
+  kmeans(centers=3, nstart=20)
+
+trade_combine_clust3 <- trade_combine %>%
+  mutate(clust3 = as.character(km_trade$cluster))
+
+# to help us identify how clusters are divided
+# km_trade$centers
+```
+
+```{r networkSetup}
+# NETWORK SETUP --------------------------------------------------------------------------
+
+# get trade between countries 
 trade_network <- trade_2018 %>%
   select(value, exporter_name, importer_name) %>%
   group_by(exporter_name, importer_name) %>%
   summarize(total_trade = sum(value)) 
 
-# Create network graph (currently too crowded)
-trade_network_data <- graph_from_data_frame(trade_network
-                                   , directed = TRUE)
-#summary(trade_network_data)
-
-trade_network_graph <- ggnetwork(trade_network_data)
-
-
-# Matching with clusters for better information
+# join trade and cluster information
 trade_network_clust <- trade_network %>%
   left_join(trade_combine_clust3, by = c("exporter_name" = "country")) %>%
   rename(clust_ex = clust3) %>%
@@ -235,81 +232,66 @@ trade_network_clust <- trade_network %>%
   rename(clust_im = clust3) %>%
   select(exporter_name, importer_name, total_trade, clust_ex, clust_im) 
 
-# See network within cluster 2
+# cluster one is too intricate to visualize
+
+# subset of countries in cluster two 
 clust_2_network <- trade_network_clust %>%
   filter(clust_ex == 2) %>%
   filter(clust_im == 2)
 
-
-clust_2_network_data <- graph_from_data_frame(clust_2_network
-                                   , directed = TRUE)
-
-clust_2_network_graph <- ggnetwork(clust_2_network_data)
-
-
-# See network within cluster 3 (not super useful bc there are too many countries within this)
+# subset of countries in cluster three
 clust_3_network <- trade_network_clust %>%
   filter(clust_ex == 3) %>%
   filter(clust_im == 3)
 
-
-clust_3_network_data <- graph_from_data_frame(clust_3_network
-                                   , directed = TRUE)
-
-clust_3_network_graph <- ggnetwork(clust_3_network_data)
-
 # function for an interactive network 
-# thickness corresponds to the volume of trade
-# you can pull the nodes towards the edge to better see the graph
-# click on a node to highlight its exports
 make_network <- function(network) {
   
+  # ensure that concatenating returns a factor
   c.factor <- function(..., recursive=TRUE) unlist(list(...), recursive=recursive)
   
+  # identify all unique countries in the data (either exporting or importing)
   name_vec <- name_vec <- c.factor(unique(c.factor(unique(network$exporter_name), 
                      unique(network$importer_name))))
   
+  # information required for visNetwork
   from <- network$exporter_name
   to <- network$importer_name
   trade <- network$total_trade
   
-  
+  # create edges                            # thickness determined by trade volume
   edges <- data.frame(from = from, to = to, value = trade)
+  
+  # create nodes
   nodes <- data.frame(id = name_vec, label = name_vec, group = name_vec)
 
+  # network visualizations
   visNetwork(nodes, edges, height = "500px", width = "100%")  %>% 
     visNodes(shape = "dot") %>%  
+             # arrows show exports
     visEdges(arrows = "to", arrowStrikethrough = F, smooth = T, physics = F) %>%
+    # hide other nodes and incoming edges when a node is selected
     visOptions(highlightNearest = list(enabled = T, degree = 0)) %>%
+    # add navigation buttons and allow multiple nodes to be selected at once
+    visInteraction(navigationButtons = TRUE, multiselect = TRUE) %>%
   visLayout(randomSeed = 17)
 
 }
+```
 
+## High Trade Volume Countries
+
+```{r interactive clustered 2 networks}
+# cluster two network 
 make_network(clust_2_network) 
 ```
 
 
-## Cluster 3 Networks
+## Medium Trade Volume Countries
 
 ```{r interactive clustered 3 networks}
+# cluster three network 
 make_network(clust_3_network)
 ```
 
-
-
-# Example {.tabset .tabset-fade .tabset-pills}
-
-## Examples
-
-You can make a numbered list like this
-
-1. First thing I want to say
-2. Second thing I want to say
-3. Third thing I want to say
-
-You can make a bulleted list like this:
-
-- item 1
-- item 2
-- item 3
 
