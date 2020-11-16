@@ -294,9 +294,9 @@ ggplot(data = clust_3_network_graph
 
 ```{r}
 # function for an interactive network 
-# color corresponds to the node the edge is coming from 
 # thickness corresponds to the volume of trade
 # you can pull the nodes towards the edge to better see the graph
+# click on a node to highlight its exports
 make_network <- function(network) {
   
   c.factor <- function(..., recursive=TRUE) unlist(list(...), recursive=recursive)
@@ -313,8 +313,9 @@ make_network <- function(network) {
   nodes <- data.frame(id = name_vec, label = name_vec, group = name_vec)
 
   visNetwork(nodes, edges, height = "1000px", width = "100%")  %>% 
-    visNodes(shape = "square") %>%  
-    visEdges(arrows = "to,from", arrowStrikethrough = F, smooth = T, physics = F) %>%
+    visNodes(shape = "dot") %>%  
+    visEdges(arrows = "to", arrowStrikethrough = F, smooth = T, physics = F) %>%
+    visOptions(highlightNearest = list(enabled = T, degree = 0)) %>%
   visLayout(randomSeed = 17)
 
 }
