@@ -1,7 +1,7 @@
 ---
 title: "International Trade"
 author: "Leah, Sam, Thai"
-date: "Add a date"
+date: "11/19/20"
 output:
   rmdformats::readthedown:
     thumbnails: false
@@ -34,7 +34,7 @@ knitr::opts_chunk$set(echo = TRUE,
 ```
 
 
-## FIRST TRY
+
 ```{r, eval = F}
 # TRADE DATA SET UP ----------------------------------------------------------------------
 # Run once the first time you open it, and never again unless you delete the files
@@ -61,6 +61,7 @@ country_codes <- read.csv("data sets/country_codes.csv")
 # read in product code data 
 product_codes <- read.csv("data sets/product_codes.csv")
 ```
+
 
 ```{r}
 # DATA WRANGLING -------------------------------------------------------------------------
@@ -124,6 +125,16 @@ world <- map("world", fill = TRUE, plot = FALSE)
 world$names <- str_replace(world$names, pattern = ":.*$", replacement = "")
 ```
 
+
+
+
+# Interactive Graphs {.tabset .tabset-fade .tabset-pills}
+
+## Infortmation
+
+
+## Interactive Export Spatial Data
+
 ```{r exports}
 # EXPORT MAP -----------------------------------------------------------------------------
 
@@ -143,16 +154,37 @@ leaflet(world) %>%
             title = "Export Percent", position = "bottomleft")
 ```
 
+## Interactive Import Spatial Data
 
-# You can even create tabs if you want! {.tabset .tabset-fade .tabset-pills}
+```{r imports}
+# IMPORT MAP -----------------------------------------------------------------------------
 
-## Bulleted list
+import_pct_named <- import_prop$import_pct
+names(import_pct_named) <- import_prop$importer_name
+
+world$import_pct <- import_pct_named[world$names]
+
+mypalette <- colorNumeric(palette = "viridis", domain = world$import_pct, 
+                           na.color = "transparent")
+
+leaflet(world) %>%
+  addTiles() %>%
+  setView(lat=10, lng=0 , zoom=2) %>%
+  addPolygons(color = "white", fillColor = ~mypalette(import_pct), weight = 1) %>%
+  addLegend(pal = mypalette, values = ~import_pct, 
+            title = "Import Percent", position = "bottomleft")
+```
+
+
+
 
 You can make a bulleted list like this:
 
 - item 1
 - item 2
 - item 3
+
+###try this
 
 
 ## Numbered list
