@@ -314,11 +314,13 @@ make_network <- function(network) {
 
   visNetwork(nodes, edges, height = "1000px", width = "100%")  %>% 
     visNodes(shape = "square") %>%  
-    visEdges(arrows = "to", smooth = T, physics = F)  
+    visEdges(arrows = "to,from", arrowStrikethrough = F, smooth = T, physics = F) %>%
+  visLayout(randomSeed = 17)
 
 }
 
-make_network(clust_2_network)
+make_network(clust_2_network) 
+
 make_network(clust_3_network)
 ```
 
