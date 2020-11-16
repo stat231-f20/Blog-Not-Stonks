@@ -1,6 +1,6 @@
 ---
-title: "Sam's Turn"
-author: "Your Names Here"
+title: "International Trade"
+author: "Leah, Sam, Thai"
 date: "Add a date"
 output:
   rmdformats::readthedown:
@@ -12,7 +12,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 library(tidyverse)
 library(evaluate)
-library(rmarkdown)
+#library(rmarkdown)
 ```
 
 # Leah's Turn
