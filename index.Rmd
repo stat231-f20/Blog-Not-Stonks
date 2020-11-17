@@ -166,8 +166,9 @@ leaflet(world) %>%
             title = "Export Percent", position = "bottomleft")
 
 #tried to add this for the hover function
-#%>%
-    #addMarkers(~long, ~lat, label = ~export_prop(exporter_name))
+#leaflet() %>% addTiles() %>%
+#  addPopups(-122.327298, 47.597131, content,
+#    options = popupOptions(closeButton = FALSE)  )
 #try by using import_data from data wrangling last r chunk
 
 
