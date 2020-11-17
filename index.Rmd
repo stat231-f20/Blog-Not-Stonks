@@ -61,6 +61,7 @@ country_codes <- read.csv("data sets/country_codes.csv")
 
 # read in product code data 
 product_codes <- read.csv("data sets/product_codes.csv")
+
 ```
 
 
@@ -126,11 +127,14 @@ world <- map("world", fill = TRUE, plot = FALSE)
 world$names <- str_replace(world$names, pattern = ":.*$", replacement = "")
 ```
 
-# Background Information
+# Introduction
+In this project, we will explore international trade relationships. Trade between countries plays a huge role in the development of several sectors of their individual economies, creating millions of jobs worldwide. Through trade countries are able to produce and export goods in which they have the comparative advantage and import goods that other countries have more efficient production in. This leads to accelerated growth for countries economies and finacial markets. In particular, we would like to visualize these relationships, and identify natural groupings among countries, as well as figure out how much trade is involved within different country groups.
 
-In this project, we will explore international trade relationships. Trade between countries plays a huge role in the development of several sectors of their individual economies, creating millions of jobs worldwide. In particular, we would like to visualize these relationships, and identify natural groupings among countries, as well as figure out how much trade is involved within different country groups.
+In order to do so, we obtained worldwide trade flows data in 2017 from CEPII, which incorporates yearly bilateral trades down to the product level. This data is directly taken from reports submitted to the United Nationals Statiscial Division. The data set includes variables such as year, product category (HS code), exporter, importer, value of the trade (in $1,000), and lastly quantity (in metric tons). Through grouping by exporter and importer and summing the value of trade, we arrive at the final dataset with trade volumes (in terms of value) between different countries in the world. We further calculate the percentage of contribution of a country's export and import to the total world trade and arrive at the next visualization. We chose to work in terms of trade volumes (in US $1,000) as this would weigh not only absolute volume of goods traded, but absolute volume weighted by its value so there is an even playing field.
 
-In order to do so, we obtained worldwide trade flows data in 2017 from CEPII, which incorporates yearly bilateral trades down to the product level. The data set includes variables such as year, product category (HS code), exporter, importer, value of the trade (in $1,000), and lastly quantity (in metric tons). Through grouping by exporter and importer and summing the value of trade, we arrive at the final dataset with trade volumes (in terms of value) between different countries in the world. We further calculate the percentage of contribution of a country's export and import to the total world trade and arrive at the next visualization.
+# Overview
+To understand the interworkings of international trade, we create a spatial data graph of the World and a trade network of clusters. This spatial graph is colored by export and import percentage. We were intrested to see the relationship between exporting and importing percentages. The clusters were chosen through unsuprived learning by volume (in terms of value) of trade. The first network graph is the network of the high volume (in terms of value) trade, where the thickness of arrows represent the amount in terms of value traded. The second network graph shows the trade between the medium trade volume countries. 
+
 
 # World Exports and Imports {.tabset .tabset-fade .tabset-pills}
 
@@ -156,7 +160,10 @@ leaflet(world) %>%
   # overlay export information
   addPolygons(color = "white", fillColor = ~mypalette(export_pct), weight = 1) %>%
   addLegend(pal = mypalette, values = ~export_pct, 
-            title = "Export Percent", position = "bottomleft")
+            title = "Export Percent", position = "bottomleft") %>%
+    addMarkers(~Long, ~Lat, label = ~export_prop(exporter_name))
+
+
 ```
 
 In this map, we are visualizing contributions of each country to total world export value. There are two clear observations: three countries (Germany, US and China) contributed significantly to world export, with each one contributing more than 8% of total world export; and the rest of the countries individually contribute very little to world export, mostly less than 2%.
@@ -285,13 +292,13 @@ make_network <- function(network) {
 }
 ```
 
-
 ## High Trade Volume Countries
 
 ```{r interactive clustered 2 networks}
 # cluster two network 
 make_network(clust_2_network) 
 ```
+- click on a country to highligh its network
 
 
 ## Medium Trade Volume Countries
@@ -300,5 +307,6 @@ make_network(clust_2_network)
 # cluster three network 
 make_network(clust_3_network)
 ```
+- click on a country to highligh its network
 
 
