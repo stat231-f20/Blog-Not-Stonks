@@ -25,6 +25,7 @@ library(ggrepel)
 library(GGally)
 library(visNetwork)
 library(rmarkdown)
+library(htmltools)
 
 knitr::opts_chunk$set(echo = TRUE, 
                       fig.align="center", 
@@ -40,11 +41,13 @@ knitr::opts_chunk$set(echo = TRUE,
 # TRADE DATA SET UP ----------------------------------------------------------------------
 # Run once the first time you open it, and never again unless you delete the files
 
+
 # trade flow data url
 URL <- "http://www.cepii.fr/DATA_DOWNLOAD/baci/trade_flows/BACI_HS17_V202001.zip"
 
 # create a file on the user's desktop 
 download.file(url = URL, destfile = "~/Desktop/trade_flows.zip")
+
 ```
 
 ```{r}
