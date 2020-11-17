@@ -131,12 +131,13 @@ world$names <- str_replace(world$names, pattern = ":.*$", replacement = "")
 ```
 
 # Introduction
-In this project, we will explore international trade relationships. Trade between countries plays a huge role in the development of several sectors of their individual economies, creating millions of jobs worldwide. Through trade countries are able to produce and export goods in which they have the comparative advantage and import goods that other countries have more efficient production in. This leads to accelerated growth for countries' economies and financial markets. In particular, we would like to visualize these relationships, and identify natural groupings among countries, as well as figure out how much trade is involved within different country groups.
+In this project, we will explore international trade relationships. Obviously in America, China is thought of as being the major exporter, while America is thought of as the major importer; we were interested to see if and how much China truly dominates the export market, and see how big of a player America is in the import market. We were also interested to see how the trade between smaller less developed countries and how they played a part in the whole world trade. Trade between countries plays a huge role in the development of almost all sectors of their individual economies, creating millions of jobs worldwide. Through trade countries are able to produce and export goods in which they have the comparative advantage and import goods that other countries have more efficient production in. Through trading, countries are able to take advantage of countries' different specialities (comparative advantage), this leads to accelerated growth for countries' economies and financial markets. In particular, we would like to visualize these relationships, and identify natural groupings among countries, as well as figure out how much trade is involved within different country groups. 
 
+# Data Background
 In order to do so, we obtained worldwide trade flows data in 2017 from CEPII, which incorporates yearly bilateral trades down to the product level. This data is directly taken from reports submitted to the United Nations Statistical Division. The data set includes variables such as year, product category (HS code), exporter, importer, value of the trade (in $1,000), and lastly quantity (in metric tons). Through grouping by exporter and importer and summing the value of trade, we arrive at the final dataset with trade volumes (in terms of value) between different countries in the world. We further calculate the percentage of contribution of a country's export and import to the total world trade and arrive at the next visualization. We chose to work in terms of trade volumes (in US $1,000) as this would weigh not only absolute volume of goods traded, but absolute volume weighted by its value so there is an even playing field.
 
 # Overview
-To understand the inner workings of international trade, we create a spatial data graph of the World and a trade network of clusters. This spatial graph is colored by export and import percentage. We were interested to see the relationship between exporting and importing percentages. The clusters were chosen through unsupervised learning by volume (in terms of value) of trade. The first network graph is the network of the high volume (in terms of value) trade, where the thickness of arrows represent the amount in terms of value traded. The second network graph shows the trade between the medium trade volume countries. 
+In order to understand the inner workings of international trade, we create two main visualizations. One of which is a spatial data graph of the World and a trade network of clusters. This spatial graph is colored by export and import percentage. We were interested to see the relationship between exporting and importing percentages. The clusters were chosen through unsupervised learning by volume (in terms of value) of trade. While the second main graph is a clustered network to show the network of where and how much of each export a specific country did to another. The first network graph is the network of the high volume (in terms of value) trade, where the thickness of arrows represent the amount in terms of value traded. The second network graph shows the trade between the medium trade volume countries. 
 
 
 # World Exports and Imports {.tabset .tabset-fade .tabset-pills}
@@ -200,6 +201,7 @@ leaflet(world) %>%
 In this map, we are visualizing contributions of each country to total world import value. We once again see Germany, US and China contributing significantly to world import, with each one contributing more than 8% of total world export. However, China, which is the leading exporter in 2017, is not the leading importer, but it is actually the US. This might indicate an interesting relationship between these two countries, which we intend to further explore through network science. 
 
 # Trade Networks {.tabset .tabset-fade .tabset-pills}
+- click on a country to highligh its network
 
 ```{r unsup}
 # CLUSTERING SETUP -----------------------------------------------------------------------
@@ -301,20 +303,21 @@ make_network <- function(network) {
 ```
 
 ## High Trade Volume Countries
+..do we want to add export in the name here..
+
 
 ```{r interactive clustered 2 networks}
 # cluster two network 
 make_network(clust_2_network) 
 ```
-- click on a country to highligh its network
+In the network between high trade volume countries, one can more simply visualize where the exports from that country were destined to go within the cluster, as a wider arrow means a higher volume of exports to that country, and a smaller arrow means a lower volume of exports to that country. The high volume countries were selected through unsupervised learning CAN SOMEONE EXPLAIN THIS PART MORE.
 
 
 ## Medium Trade Volume Countries
+..do we want to add export in the name here..
 
 ```{r interactive clustered 3 networks}
 # cluster three network 
 make_network(clust_3_network)
 ```
-- click on a country to highligh its network
-
-
+In the network between medium trade volume countries, the export paths from each country to all countries it exports to is very easy and interesting to see here. By clicking on a country one can see if it exports more to one country than another through the thickness of the arrow and can even see if they don't export with one specific country. This cluster was also chosen through unsupervised learning CAN SOMEONE EXPLAIN THIS PART MORE. 
