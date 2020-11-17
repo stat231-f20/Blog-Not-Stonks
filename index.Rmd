@@ -37,7 +37,7 @@ knitr::opts_chunk$set(echo = TRUE,
 
 
 
-```{r, eval = F}
+```{r}
 # TRADE DATA SET UP ----------------------------------------------------------------------
 # Run once the first time you open it, and never again unless you delete the files
 
@@ -164,7 +164,7 @@ leaflet(world) %>%
   addPolygons(color = "white", fillColor = ~mypalette(export_pct), weight = 1) %>%
   addLegend(pal = mypalette, values = ~export_pct, 
             title = "Export Percent", position = "bottomleft") %>%
-    addMarkers(~Long, ~Lat, label = ~export_prop(exporter_name))
+    addMarkers(~long, ~lat, label = ~export_prop(exporter_name))
 
 
 ```
