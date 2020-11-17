@@ -163,8 +163,11 @@ leaflet(world) %>%
   # overlay export information
   addPolygons(color = "white", fillColor = ~mypalette(export_pct), weight = 1) %>%
   addLegend(pal = mypalette, values = ~export_pct, 
-            title = "Export Percent", position = "bottomleft") %>%
-    addMarkers(~long, ~lat, label = ~export_prop(exporter_name))
+            title = "Export Percent", position = "bottomleft")
+
+#tried to add this for the hover function
+#%>%
+    #addMarkers(~long, ~lat, label = ~export_prop(exporter_name))
 
 
 ```
