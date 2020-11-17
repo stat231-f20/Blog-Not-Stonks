@@ -168,6 +168,7 @@ leaflet(world) %>%
 #tried to add this for the hover function
 #%>%
     #addMarkers(~long, ~lat, label = ~export_prop(exporter_name))
+#try by using import_data from data wrangling last r chunk
 
 
 ```
