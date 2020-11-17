@@ -128,6 +128,10 @@ world$names <- str_replace(world$names, pattern = ":.*$", replacement = "")
 
 # Background Information
 
+In this project, we will explore international trade relationships. Trade between countries plays a huge role in the development of several sectors of their individual economies, creating millions of jobs worldwide. In particular, we would like to visualize these relationships, and identify natural groupings among countries, as well as figure out how much trade is involved within different country groups.
+
+In order to do so, we obtained worldwide trade flows data in 2017 from CEPII, which incorporates yearly bilateral trades down to the product level. The data set includes variables such as year, product category (HS code), exporter, importer, value of the trade (in $1,000), and lastly quantity (in metric tons). Through grouping by exporter and importer and summing the value of trade, we arrive at the final dataset with trade volumes (in terms of value) between different countries in the world. We further calculate the percentage of contribution of a country's export and import to the total world trade and arrive at the next visualization.
+
 # World Exports and Imports {.tabset .tabset-fade .tabset-pills}
 
 ## Contribution to World Exports by Country
@@ -155,6 +159,8 @@ leaflet(world) %>%
             title = "Export Percent", position = "bottomleft")
 ```
 
+In this map, we are visualizing contributions of each country to total world export value. There are two clear observations: three countries (Germany, US and China) contributed significantly to world export, with each one contributing more than 8% of total world export; and the rest of the countries individually contribute very little to world export, mostly less than 2%.
+
 ## Contribution to World Imports by Country 
 
 ```{r imports}
@@ -176,7 +182,7 @@ leaflet(world) %>%
             title = "Import Percent", position = "bottomleft")
 ```
 
-
+In this map, we are visualizing contributions of each country to total world import value. We once again see Germany, US and China contributing significantly to world import, with each one contributing more than 8% of total world export. However, China, which is the leading exporter in 2017, is not the leading importer, but it is actually the US. This might indicate an interesting relationship between these two countries, which we intend to further explore through network science. 
 
 # Trade Networks {.tabset .tabset-fade .tabset-pills}
 
@@ -278,6 +284,7 @@ make_network <- function(network) {
 
 }
 ```
+
 
 ## High Trade Volume Countries
 
