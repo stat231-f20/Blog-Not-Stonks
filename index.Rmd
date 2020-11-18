@@ -171,20 +171,18 @@ world$export_pct <- export_pct_named[world$names]
 mypalette <- colorNumeric(palette = "viridis", domain = world$export_pct, 
                            na.color = "transparent")
 
+exportpopup <- paste0("Export Percentage: ", as.character(world$export_pct))
+
+
 # interactive map 
 leaflet(world) %>%
   addTiles() %>%
   setView(lat=10, lng=0 , zoom=2) %>%
   # overlay export information
-  addPolygons(color = "white", fillColor = ~mypalette(export_pct), weight = 1) %>%
+  addPolygons(color = "white", fillColor = ~mypalette(export_pct), weight = 1, label = exportpopup) %>%
   addLegend(pal = mypalette, values = ~export_pct, 
             title = "Export Percent", position = "bottomleft")
 
-#tried to add this for the hover function
-#leaflet() %>% addTiles() %>%
-#  addPopups(-122.327298, 47.597131, content,
-#    options = popupOptions(closeButton = FALSE)  )
-#try by using import_data from data wrangling last r chunk
 
 
 ```
@@ -202,12 +200,15 @@ names(import_pct_named) <- import_prop$importer_name
 
 world$import_pct <- import_pct_named[world$names]
 
+#try to add popup
+importpopup <- paste0("Import Percentage: ", as.character(world$import_pct))
+
 # interactive map
 leaflet(world) %>%
   addTiles() %>%
   setView(lat=10, lng=0 , zoom=2) %>%
   # overlay import information
-  addPolygons(color = "white", fillColor = ~mypalette(import_pct), weight = 1) %>%
+  addPolygons(color = "white", fillColor = ~mypalette(import_pct), weight = 1, label = importpopup) %>%
   addLegend(pal = mypalette, values = ~import_pct, 
             title = "Import Percent", position = "bottomleft")
 ```
@@ -288,7 +289,9 @@ In cluster 3, the countries, on average, contribute close to 2.5% of total world
 ## Data Table 
 
 ```{r data table}
-reactable(trade_combine_clust3)
+datatable <- trade_combine_clust3 %>%
+  rename(Country = country, "Export Percent" = export_pct, "Import Percent" = import_pct, Cluster = clust3)
+reactable(datatable)
 ```
 
 # Trade Networks {.tabset .tabset-fade .tabset-pills}
