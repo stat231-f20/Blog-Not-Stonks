@@ -273,8 +273,8 @@ ggplot(data = trade_combine_clust3, aes(x = import_pct, y = export_pct)) +
   geom_point(data = as.data.frame(km_trade$centers), aes(x = import_pct, y = export_pct),
              pch = "X", size = 4) +
   labs(title = "Three Cluster Solution",
-       x = "Import percentage of world import", 
-       y = "Export percentage of world export", 
+       x = "Percentage of Total Imports", 
+       y = "Percentage of Total Exports", 
        color = "Cluster Assignment:") + 
   theme(legend.position = "bottom")
 ```
@@ -284,6 +284,12 @@ From the graph above, we can see the large disparity between clusters, particula
 In cluster 3, the countries, on average, contribute close to 2.5% of total world trade, much lower than in cluster 2 but also much higher than cluster 1 which contains most of the countries in the world but each contributed negligibly in comparison to world trade. 
 
 # Trade Networks {.tabset .tabset-fade .tabset-pills}
+
+From our cluster analysis, we were able to identify 3 groups of countries, corresponding to low, medium, and high volumes of trade. Of these, we want to look at relationships within the medium and high trade volume countries in particular, since there are far too many low trade volume countries to be able to get a meaningful visualization.
+
+The networks below display the relationships among high trade volume countries. Arrows indicate the direction of exports, and as such point from the exporting country to the importing country. Edges in this graph are colored corresponding to their country of origin or exporter country, and sized based on the volume of trade, with larger edges indicating more volume.
+
+You can interact with the nodes by dragging and moving them, or using the navigation buttons. Further, you can highlight a particular country's exports by clicking on its corresponding nodes. You can select multiple countries, by clicking and holding their corresponding nodes.   
 
 ```{r networkSetup}
 # NETWORK SETUP --------------------------------------------------------------------------
@@ -351,24 +357,30 @@ make_network <- function(network) {
 ```
 
 ## High Trade Volume Countries
-..do we want to add export in the name here..
 
 
 ```{r interactive clustered 2 networks}
 # cluster two network 
 make_network(clust_2_network) 
 ```
-In the network between high trade volume countries, one can more simply visualize where the exports from that country were destined to go within the cluster, as a wider arrow means a higher volume of exports to that country, and a smaller arrow means a lower volume of exports to that country. The high volume countries were selected through unsupervised learning CAN SOMEONE EXPLAIN THIS PART MORE.
 
+In the network above, which displays the relationship between high trade volume countries, we can see in particular that there is a large volume of trade flow from China to the United States. While we might previously have expected this given that China is the largest exporter, and the United States the largest importer, we did not know until now whether that was due to a direct relationship between the two. 
 
 ## Medium Trade Volume Countries
-..do we want to add export in the name here..
+
 
 ```{r interactive clustered 3 networks}
 # cluster three network 
 make_network(clust_3_network)
 ```
-In the network between medium trade volume countries, the export paths from each country to all countries it exports to is very easy and interesting to see here. By clicking on a country one can see if it exports more to one country than another through the thickness of the arrow and can even see if they don't export with one specific country. This cluster was also chosen through unsupervised learning CAN SOMEONE EXPLAIN THIS PART MORE. 
+
+This network looks slightly hard to read at first, but becomes clearer when you take advantage of the interactive elements. Highlighting the Netherlands, we can see that there seems to be a large volume of trade flow from the Netherlands to Belgium and Luxembourg, and the United Kingdom. Highlighting Belgium shows that they appear to export a lot to France as well, and this relationship is reciprocal. France also appears to have noticeable exports to the United Kingdom. So all of these countries appear to be closely related.
+
+We can continue to extract insight from this network -- Korea, for example, seems to have strong export relations with several regions including Japan, Hong Kong, and Vietnam, and there is a strong bilateral relationship between Singapore and Malaysia. 
+
+# Conclusion 
+
+
 
 # Citations 
 
