@@ -3,7 +3,7 @@ title: "International Trade"
 author: "Leah, Sam, Thai"
 date: "11/19/20"
 output: 
-  rmdformats::material:
+  rmdformats::readthedown:
     thumbnails: false
     highlight: NULL
 ---
@@ -33,11 +33,13 @@ knitr::opts_chunk$set(echo = TRUE,
                       warning = FALSE, 
                       comment = NA, 
                       echo = FALSE)
+
+theme_set(theme_minimal())
 ```
 
 
 
-```{r}
+```{r, eval = F}
 # TRADE DATA SET UP ----------------------------------------------------------------------
 # Run once the first time you open it, and never again unless you delete the files
 
@@ -138,17 +140,17 @@ In its early years, trade was thought of as quite competitive, and nations belie
 
 Now, international trade is an integral part of the global economy. Countries enter into economic transactions with one another whereby they are able to produce and export goods in which they have the comparative advantage and import goods that other countries have more efficient production in. Through trading, countries are able to take advantage of their different specialties, which leads to accelerated growth for their individual economies and financial markets. A long way from the barter system of old, international trade today is facilitated by large financial institutions, and in 2018 alone the total value of global exports was approximately 19.5 trillion USD. 
 
+# Our Analysis
+
 In the United States, there's a widespread view that China is the major exporter, and the US the major importer in the global economy. But how much does China dominate the export market, and is the United States as big of a player in the import market as we think? In addition, are there natural divisions among countries in terms of trade volumes? What does the global trade network really look like? These are the questions we look to address. 
+
+These questions all relate in some way to the distribution of trade worldwide. To get a broad overview, we look first at choropleths depicting share in total exports, and in total imports, by country. This gives us a preliminary understanding, not only of how countries relate to one another in terms of exports and imports, but also of how imports and exports relate within a particular country. We then move to the second question -- do natural groupings arise among countries based on trade volume? To explore this, we conduct a cluster analysis using k-means, which in turn forms the basis of a network analysis, where we look at how countries in these clusters interact, and which appear to be the most important.
 
 # Data Background
 
-The visualizations and analysis that follow are based on worldwide trade flow data taken from CEPII, which incorporates yearly bilateral trades down to the product level. This data is directly taken from reports submitted to the United Nations Statistical Division, and includes variables such as year, product category, exporter, importer, value of the trade (in \$1,000), and lastly quantity (in metric tons). 
+The visualizations and analysis that follow are based on worldwide trade flow data taken from [CEPII](http://www.cepii.fr/CEPII/en/bdd_modele/presentation.asp?id=37), which incorporates yearly bilateral trades down to the product level. This data is directly taken from reports submitted to the United Nations Statistical Division, and includes variables such as year, product category, exporter, importer, value of the trade (in \$1,000), and lastly quantity (in metric tons). 
 
-Through grouping by exporter and importer and summing the value of trade, we are able to calculate trade volumes (in terms of value, for better comparison) between various different countries.
-
-# Overview
-In order to understand the inner workings of international trade, we create two main visualizations. One of which is a spatial data graph of the World and a trade network of clusters. This spatial graph is colored by export and import percentage. We were interested to see the relationship between exporting and importing percentages. The clusters were chosen through unsupervised learning by volume (in terms of value) of trade. While the second main graph is a clustered network to show the network of where and how much of each export a specific country did to another. The first network graph is the network of the high volume (in terms of value) trade, where the thickness of arrows represent the amount in terms of value traded. The second network graph shows the trade between the medium trade volume countries. 
-
+We restrict our focus particularly to the year 2017. Through grouping by exporter and importer and summing the value of trade, we are able to calculate trade volumes (in terms of value, for better comparison) between various different countries. We further use this to calculate a country's share in total exports and imports. 
 
 # World Exports and Imports {.tabset .tabset-fade .tabset-pills}
 
@@ -185,7 +187,7 @@ leaflet(world) %>%
 
 ```
 
-In this map, we are visualizing contributions of each country to total world export value. There are two clear observations: three countries (Germany, US and China) contributed significantly to world export, with each one contributing more than 8% of total world export; and the rest of the countries individually contribute very little to world export, mostly less than 2%.
+The map above displays individual country contributions, as a percentage of total world export value. Countries in gray correspond to those for which we did not have data. As expected, China appears to dominate exports, accounting for around 14\% of total world exports. The United States and Germany also contribute significantly, with each contributing more than 8\% of total world exports. However the rest of the countries seem to contribute very little individually, with most accounting for less than 2\% of global exports each. 
 
 ## Contribution to World Imports by Country 
 
@@ -208,9 +210,15 @@ leaflet(world) %>%
             title = "Import Percent", position = "bottomleft")
 ```
 
-In this map, we are visualizing contributions of each country to total world import value. We once again see Germany, US and China contributing significantly to world import, with each one contributing more than 8% of total world export. However, China, which is the leading exporter in 2017, is not the leading importer, but it is actually the US. This might indicate an interesting relationship between these two countries, which we intend to further explore through clustering and network science. 
+Here we look at the contributions of each country to total world imports, as a percentage. Once again, countries in gray correspond to those for which data were unavailable. We see that Germany, the United States, and China appear to be the major players. Interestingly, though China is the leading exporter in 2017, it is the United States that dominates with respect to imports, accounting for around 12\% of the global total. This might indicate an interesting relationship between these two countries, which we will explore in the clustering and network analyses. 
 
 # Clustering {.tabset .tabset-fade .tabset-pills}
+
+From our initial visualizations, it seems at least that the United States, Germany, and China, are distinct in terms of exports and imports. In order to uncover any other natural groups, as well as to see if these three countries do indeed form a group, we undertake a cluster analysis using k-means -- a partitioning method. 
+
+## Testing the Optimal Number of Clusters
+
+Since the k-means solution requires us to specify a number of clusters, we look at the total within group sum of squares as a metric by which to select the optimal number of clusters. Below, we plot the total within group sum of squares vs. the optimal number of clusters, looking for an "elbow" in the plot.
 
 ```{r unsup 1}
 # CLUSTERING SETUP -----------------------------------------------------------------------
@@ -221,11 +229,6 @@ trade_combine <- export_prop %>%
   rename(country = exporter_name)
 
 vars <- c("export_pct" , "import_pct")
-
-# WSS plot for optimal number of clusters
-# wss_plot <- trade_combine %>%
-#  select(c(export_pct, import_pct)) %>%
-#  factoextra::fviz_nbclust(kmeans, method = "wss")
 
 # Testing optimal number of clusters
 fig <- matrix(NA, nrow=10, ncol=2)
@@ -238,16 +241,17 @@ for (i in 1:10){
 }
 
 ggplot(data = as.data.frame(fig), aes(x = V1, y = V2)) +
-  geom_point() + 
+  geom_point() +
   geom_line() +
   scale_x_continuous(breaks=c(1:10)) +
-  labs(x = "K", y = expression("Total W"[k]))
-
-# Use k-means clustering to identify 3 clusters based on contribution in terms of export 
-# and import to world trade
+  labs(title = "Within Group Sum of Squares vs. Number of Clusters",
+       x = "Number of Clusters (k)", 
+       y = expression("Total W"[k]))
 ```
 
-From this graph of average distance to centroid against cluster number, we can see that there is a clear "hook" at k=3, meaning that our k-means method does not reduce much more variation in distance to centroid after k=3. Thus, the best cluster size for k-means is 3. 
+From this graph of within group sum of squares against the number of clusters, we can see that there is a clear "elbow" at 3 clusters, which indicates that the optimal number of clusters for our k-means solution is 3. Beyond this, an increase in number of clusters doesn't provide us much improvement in the solution, and so would be an unnecessary increase in complexity.  
+
+## Visualizing the Cluster Solution
 
 ```{r unsup 2}
 # K-MEANS CLUSTERING ---------------------------------------------------------------------
@@ -262,27 +266,24 @@ km_trade <- trade_combine %>%
 trade_combine_clust3 <- trade_combine %>%
   mutate(clust3 = as.character(km_trade$cluster))
 
-# to help us identify how clusters are divided
-# km_trade$centers
-
 # visualize the cluster assignments and centroids
 ggplot(data = trade_combine_clust3, aes(x = import_pct, y = export_pct)) + 
   geom_point(aes(color = clust3)) +
   coord_fixed() +
-  geom_point(data = as.data.frame(km_trade$centers)
-             , aes(x = import_pct, y = export_pct)
-             , pch = "X"
-             , size = 4) +
-  labs(x = "Import percentage of world import"
-       , y = "Export percentage of world export" 
-       , color = "Cluster Assignment")
+  geom_point(data = as.data.frame(km_trade$centers), aes(x = import_pct, y = export_pct),
+             pch = "X", size = 4) +
+  labs(title = "Three Cluster Solution",
+       x = "Import percentage of world import", 
+       y = "Export percentage of world export", 
+       color = "Cluster Assignment:") + 
+  theme(legend.position = "bottom")
 ```
 
-From the graph above, we can see the large disparity existing between each cluster. The three countries in cluster 2 contributed significantly more to world exports than the rest of the other countries as they on average contribute to 10% to world trade individually. In cluster 3, the countries do contribute on average close to 2.5% of total world trade, much lower than in cluster 2 but also much higher than cluster 1 which contains most of the countries in the world but each contributed very little to world trade. We want to further see what the relationship is between countries in cluster 2 and 3.
+From the graph above, we can see the large disparity between clusters, particularly with respect to the countries in cluster 2. These three countries contributed significantly more to world exports and imports than the rest of the other countries as they, on average, contribute 10% to world trade individually. 
+
+In cluster 3, the countries, on average, contribute close to 2.5% of total world trade, much lower than in cluster 2 but also much higher than cluster 1 which contains most of the countries in the world but each contributed negligibly in comparison to world trade. 
 
 # Trade Networks {.tabset .tabset-fade .tabset-pills}
-- click on a country to highligh its network
-
 
 ```{r networkSetup}
 # NETWORK SETUP --------------------------------------------------------------------------
@@ -374,3 +375,5 @@ In the network between medium trade volume countries, the export paths from each
 https://www.statista.com/statistics/264682/worldwide-export-volume-in-the-trade-since-1950/
 
 https://www.britannica.com/topic/international-trade
+
+http://www.cepii.fr/CEPII/en/bdd_modele/presentation.asp?id=37
