@@ -4,6 +4,7 @@ author: "Leah, Sam, Thai"
 date: "11/19/20"
 output: 
   rmdformats::readthedown:
+    css: custom.css
     thumbnails: false
     highlight: NULL
 ---
@@ -241,8 +242,8 @@ for (i in 1:10){
 }
 
 ggplot(data = as.data.frame(fig), aes(x = V1, y = V2)) +
-  geom_point() +
-  geom_line() +
+  geom_point(color = "steelblue") +
+  geom_line(color = "steelblue") +
   scale_x_continuous(breaks=c(1:10)) +
   labs(title = "Within Group Sum of Squares vs. Number of Clusters",
        x = "Number of Clusters (k)", 
@@ -378,11 +379,54 @@ This network looks slightly hard to read at first, but becomes clearer when you 
 
 We can continue to extract insight from this network -- Korea, for example, seems to have strong export relations with several regions including Japan, Hong Kong, and Vietnam, and there is a strong bilateral relationship between Singapore and Malaysia. 
 
+## Behind the Scenes 
+
+Below is the code we used, where we wrote a function to take a data frame with exporting country, importing country, and total trade volume, and create the kind of network we just showed. We used the `visNetwork` package both to create the base network, as well as to add node and edge attributes, and interactive elements. 
+
+```{r, echo = T, eval = F}
+# function for an interactive network 
+make_network <- function(network) {
+  
+  # ensure that concatenating returns a factor
+  c.factor <- function(..., recursive=TRUE) unlist(list(...), recursive=recursive)
+  
+  # identify all unique countries in the data (either exporting or importing)
+  name_vec <- name_vec <- c.factor(unique(c.factor(unique(network$exporter_name), 
+                     unique(network$importer_name))))
+  
+  # information required for visNetwork
+  from <- network$exporter_name
+  to <- network$importer_name
+  trade <- network$total_trade
+  
+  # create edges                            # thickness determined by trade volume
+  edges <- data.frame(from = from, to = to, value = trade)
+  
+  # create nodes
+  nodes <- data.frame(id = name_vec, label = name_vec, group = name_vec)
+
+  # network visualizations
+  visNetwork(nodes, edges, height = "500px", width = "100%")  %>% 
+    visNodes(shape = "dot") %>%  
+             # arrows show exports
+    visEdges(arrows = "to", arrowStrikethrough = F, smooth = T, physics = F) %>%
+    # hide other nodes and incoming edges when a node is selected
+    visOptions(highlightNearest = list(enabled = T, degree = 0)) %>%
+    # add navigation buttons and allow multiple nodes to be selected at once
+    visInteraction(navigationButtons = TRUE, multiselect = TRUE) %>%
+  visLayout(randomSeed = 17)
+
+```
+
 # Conclusion 
 
+Looking at the distribution of trade worldwide, we see that China, the United States, and Germany appear to dominate both with respect to exports and imports. China is by far responsible for the most exports, while the US is responsible for the most imports. Though in our initial maps, the rest of the world all looked fairly similar, we were actually able to identify three natural groups of countries based on trade volume -- high, medium, and low. As expected, China, Germany, and the United States are the sole members of the high trade volume category, with export and import volume far higher than the rest. 
 
+Examining the trade relationships within clusters, we see a strong flow of goods and services from China to the United States -- by far the strongest relationship we identify overall. Even in the medium trade flow cluster, we are able to identify some strong relationships. Netherlands, Belgium-Luxembourg, France, and the UK seem to have high trade flow between them, as do Singapore and Malaysia. 
 
-# Citations 
+Unfortunately, we were unable to visualize the last cluster due to its sheer size, which would have made a similar network visualization far too cluttered to be meaningful. As such, we are unable to provide an all-encompassing picture of international trade relations, which we would have liked to see. 
+
+# Citations (need to add in properly) 
 
 https://www.statista.com/statistics/264682/worldwide-export-volume-in-the-trade-since-1950/
 
