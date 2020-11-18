@@ -27,6 +27,7 @@ library(GGally)
 library(visNetwork)
 library(rmarkdown)
 library(htmltools)
+library(reactable)
 
 knitr::opts_chunk$set(echo = TRUE, 
                       fig.align="center", 
@@ -283,6 +284,12 @@ ggplot(data = trade_combine_clust3, aes(x = import_pct, y = export_pct)) +
 From the graph above, we can see the large disparity between clusters, particularly with respect to the countries in cluster 2. These three countries contributed significantly more to world exports and imports than the rest of the other countries as they, on average, contribute 10% to world trade individually. 
 
 In cluster 3, the countries, on average, contribute close to 2.5% of total world trade, much lower than in cluster 2 but also much higher than cluster 1 which contains most of the countries in the world but each contributed negligibly in comparison to world trade. 
+
+## Data Table 
+
+```{r data table}
+reactable(trade_combine_clust3)
+```
 
 # Trade Networks {.tabset .tabset-fade .tabset-pills}
 

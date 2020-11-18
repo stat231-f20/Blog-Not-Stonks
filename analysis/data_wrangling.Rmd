@@ -386,6 +386,12 @@ ggplot(import_data, aes(x = long, y = lat, group = group, fill = import_pct)) +
 
 
 
+## try for tables
+
+```{r}
+library(reactable)
+reactable(trade_combine_clust3)
+```
 
 
 
