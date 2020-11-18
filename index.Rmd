@@ -134,7 +134,7 @@ world$names <- str_replace(world$names, pattern = ":.*$", replacement = "")
 In this project, we will explore international trade relationships. Obviously in America, China is thought of as being the major exporter, while America is thought of as the major importer; we were interested to see if and how much China truly dominates the export market, and see how big of a player America is in the import market. We were also interested to see how the trade between smaller less developed countries and how they played a part in the whole world trade. Trade between countries plays a huge role in the development of almost all sectors of their individual economies, creating millions of jobs worldwide. Through trade countries are able to produce and export goods in which they have the comparative advantage and import goods that other countries have more efficient production in. Through trading, countries are able to take advantage of countries' different specialities (comparative advantage), this leads to accelerated growth for countries' economies and financial markets. In particular, we would like to visualize these relationships, and identify natural groupings among countries, as well as figure out how much trade is involved within different country groups. 
 
 # Data Background
-In order to do so, we obtained worldwide trade flows data in 2017 from CEPII, which incorporates yearly bilateral trades down to the product level. This data is directly taken from reports submitted to the United Nations Statistical Division. The data set includes variables such as year, product category (HS code), exporter, importer, value of the trade (in $1,000), and lastly quantity (in metric tons). Through grouping by exporter and importer and summing the value of trade, we arrive at the final dataset with trade volumes (in terms of value) between different countries in the world. We further calculate the percentage of contribution of a country's export and import to the total world trade and arrive at the next visualization. We chose to work in terms of trade volumes (in US $1,000) as this would weigh not only absolute volume of goods traded, but absolute volume weighted by its value so there is an even playing field.
+In order to do so, we obtained worldwide trade flows data in 2017 from CEPII, which incorporates yearly bilateral trades down to the product level. This data is directly taken from reports submitted to the United Nations Statistical Division. The data set includes variables such as year, product category (HS code), exporter, importer, value of the trade (in \$1,000), and lastly quantity (in metric tons). Through grouping by exporter and importer and summing the value of trade, we arrive at the final dataset with trade volumes (in terms of value) between different countries in the world. We further calculate the percentage of contribution of a country's export and import to the total world trade and arrive at the next visualization. We chose to work in terms of trade volumes (in US \$1,000) as this would weigh not only absolute volume of goods traded, but absolute volume weighted by its value so there is an even playing field.
 
 # Overview
 In order to understand the inner workings of international trade, we create two main visualizations. One of which is a spatial data graph of the World and a trade network of clusters. This spatial graph is colored by export and import percentage. We were interested to see the relationship between exporting and importing percentages. The clusters were chosen through unsupervised learning by volume (in terms of value) of trade. While the second main graph is a clustered network to show the network of where and how much of each export a specific country did to another. The first network graph is the network of the high volume (in terms of value) trade, where the thickness of arrows represent the amount in terms of value traded. The second network graph shows the trade between the medium trade volume countries. 
@@ -198,12 +198,11 @@ leaflet(world) %>%
             title = "Import Percent", position = "bottomleft")
 ```
 
-In this map, we are visualizing contributions of each country to total world import value. We once again see Germany, US and China contributing significantly to world import, with each one contributing more than 8% of total world export. However, China, which is the leading exporter in 2017, is not the leading importer, but it is actually the US. This might indicate an interesting relationship between these two countries, which we intend to further explore through network science. 
+In this map, we are visualizing contributions of each country to total world import value. We once again see Germany, US and China contributing significantly to world import, with each one contributing more than 8% of total world export. However, China, which is the leading exporter in 2017, is not the leading importer, but it is actually the US. This might indicate an interesting relationship between these two countries, which we intend to further explore through clustering and network science. 
 
-# Trade Networks {.tabset .tabset-fade .tabset-pills}
-- click on a country to highligh its network
+# Clustering {.tabset .tabset-fade .tabset-pills}
 
-```{r unsup}
+```{r unsup 1}
 # CLUSTERING SETUP -----------------------------------------------------------------------
 
 # combine export and import data for clustering
@@ -214,13 +213,33 @@ trade_combine <- export_prop %>%
 vars <- c("export_pct" , "import_pct")
 
 # WSS plot for optimal number of clusters
-wss_plot <- trade_combine %>%
-  select(c(export_pct, import_pct)) %>%
-  factoextra::fviz_nbclust(kmeans, method = "wss")
+# wss_plot <- trade_combine %>%
+#  select(c(export_pct, import_pct)) %>%
+#  factoextra::fviz_nbclust(kmeans, method = "wss")
+
+# Testing optimal number of clusters
+fig <- matrix(NA, nrow=10, ncol=2)
+set.seed(75)
+for (i in 1:10){
+  fig[i,1] <- i
+  fig[i,2] <- kmeans(trade_combine[,2:3]
+                    , centers=i
+                    , nstart=20)$tot.withinss
+}
+
+ggplot(data = as.data.frame(fig), aes(x = V1, y = V2)) +
+  geom_point() + 
+  geom_line() +
+  scale_x_continuous(breaks=c(1:10)) +
+  labs(x = "K", y = expression("Total W"[k]))
 
 # Use k-means clustering to identify 3 clusters based on contribution in terms of export 
 # and import to world trade
+```
 
+From this graph of average distance to centroid against cluster number, we can see that there is a clear "hook" at k=3, meaning that our k-means method does not reduce much more variation in distance to centroid after k=3. Thus, the best cluster size for k-means is 3. 
+
+```{r unsup 2}
 # K-MEANS CLUSTERING ---------------------------------------------------------------------
 
 # set seed for reproducibility
@@ -235,7 +254,25 @@ trade_combine_clust3 <- trade_combine %>%
 
 # to help us identify how clusters are divided
 # km_trade$centers
+
+# visualize the cluster assignments and centroids
+ggplot(data = trade_combine_clust3, aes(x = import_pct, y = export_pct)) + 
+  geom_point(aes(color = clust3)) +
+  coord_fixed() +
+  geom_point(data = as.data.frame(km_trade$centers)
+             , aes(x = import_pct, y = export_pct)
+             , pch = "X"
+             , size = 4) +
+  labs(x = "Import percentage of world import"
+       , y = "Export percentage of world export" 
+       , color = "Cluster Assignment")
 ```
+
+From the graph above, we can see the large disparity existing between each cluster. The three countries in cluster 2 contributed significantly more to world exports than the rest of the other countries as they on average contribute to 10% to world trade individually. In cluster 3, the countries do contribute on average close to 2.5% of total world trade, much lower than in cluster 2 but also much higher than cluster 1 which contains most of the countries in the world but each contributed very little to world trade. We want to further see what the relationship is between countries in cluster 2 and 3.
+
+# Trade Networks {.tabset .tabset-fade .tabset-pills}
+- click on a country to highligh its network
+
 
 ```{r networkSetup}
 # NETWORK SETUP --------------------------------------------------------------------------
