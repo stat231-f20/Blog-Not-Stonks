@@ -156,6 +156,8 @@ We restrict our focus particularly to the year 2017. Through grouping by exporte
 
 # World Exports and Imports {.tabset .tabset-fade .tabset-pills}
 
+To get a broad overview of each country's contribution to global trade, we look at two choropleths -- the first colored by country share in total exports (as a percentage), and the second colored by country share in total imports (again, a percentage). The choropleths are interactive, and hovering over a country gives its export/import percentage, depending on which graph you're looking at. 
+
 ## Contribution to World Exports by Country
 
 ```{r exports}
@@ -171,6 +173,7 @@ world$export_pct <- export_pct_named[world$names]
 mypalette <- colorNumeric(palette = "viridis", domain = world$export_pct, 
                            na.color = "transparent")
 
+# specify popup
 exportpopup <- paste0("Export Percentage: ", as.character(world$export_pct))
 
 
@@ -182,12 +185,9 @@ leaflet(world) %>%
   addPolygons(color = "white", fillColor = ~mypalette(export_pct), weight = 1, label = exportpopup) %>%
   addLegend(pal = mypalette, values = ~export_pct, 
             title = "Export Percent", position = "bottomleft")
-
-
-
 ```
 
-The map above displays individual country contributions, as a percentage of total world export value. Countries in gray correspond to those for which we did not have data. As expected, China appears to dominate exports, accounting for around 14\% of total world exports. The United States and Germany also contribute significantly, with each contributing more than 8\% of total world exports. However the rest of the countries seem to contribute very little individually, with most accounting for less than 2\% of global exports each. 
+The map above displays individual country contributions, as a percentage of total world export value. Countries in gray correspond to those for which we did not have data. As expected, China appears to dominate exports, accounting for around 14\% of total world exports. The United States and Germany also contribute significantly, with each contributing around 8\% of total world exports. However the rest of the countries seem to contribute very little individually, with most accounting for less than 2\% of global exports each. 
 
 ## Contribution to World Imports by Country 
 
@@ -200,7 +200,7 @@ names(import_pct_named) <- import_prop$importer_name
 
 world$import_pct <- import_pct_named[world$names]
 
-#try to add popup
+# specify popup
 importpopup <- paste0("Import Percentage: ", as.character(world$import_pct))
 
 # interactive map
@@ -425,7 +425,7 @@ make_network <- function(network) {
     # add navigation buttons and allow multiple nodes to be selected at once
     visInteraction(navigationButtons = TRUE, multiselect = TRUE) %>%
   visLayout(randomSeed = 17)
-
+}
 ```
 
 # Conclusion 

@@ -1,7 +1,16 @@
-h1 {
+h1, h2, h3, h4, h5, h6, legend {
   color: #438a8f
 }
 
-h2 {
-  background: #438a8f;
+#sidebar h2 {
+  background-color: #438a8f;
+}
+
+#main a {
+  color: #438a8f;
+}
+
+.navbar-nav > .active > a { 
+    background-color: #438a8f;
+    color: white;
 }
