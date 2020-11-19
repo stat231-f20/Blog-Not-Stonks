@@ -137,17 +137,17 @@ world$names <- str_replace(world$names, pattern = ":.*$", replacement = "")
 
 # Introduction
 
-Trade has been a quintessential component of human interaction since the dawn of history. In its simplest fashion we had the barter system -- the exchange of goods and services without the use of money. As society developed further, and we began to explore the concept of a 'nation' as a unit above the individual, the scope of trade found natural extensions to the international sphere. 
+Take a look at the clothes tag for the new shirt you just bought, at the bottom of that jug right by your table, or at the bottom of the Macbook in front of you. How many of them actually say made in America? Or do you see "made in China", "made in Vietnam", "made in Germany" , etc? The reason why those objects exist in front of you is all due to trade.
 
-In its early years, trade was thought of as quite competitive, and nations believed that if one were to increase their trade, this could only be done at the cost of another. Countries actively tried to dominate in terms of exports, but minimized imports, believing this would best protect their interests. This viewpoint was overturned with the advent of liberalism, and the idea that trade should be free. As a whole, we've gone back and forth between these ideas over the years, and landed somewhere in the middle -- free trade as far as possible, with trade agreements and global organizations to keep us all in line (International trade 2020). 
+Trade has been a quintessential component of human interaction since the dawn of history. In its simplest fashion we had the barter system, and as society developed to the point it is today, we have a complex international trade system, operated by international organizations and multiple trade agreements. A long way from the barter system of old, international trade today is facilitated by large financial institutions, and in 2018 alone the total value of global exports was approximately 19.5 trillion USD (Worldwide export trade volume 1950-2018).
 
-Now, international trade is an integral part of the global economy. Countries enter into economic transactions with one another whereby they are able to produce and export goods in which they have the comparative advantage and import goods that other countries have more efficient production in. Through trading, countries are able to take advantage of their different specialties, which leads to accelerated growth for their individual economies and financial markets. A long way from the barter system of old, international trade today is facilitated by large financial institutions, and in 2018 alone the total value of global exports was approximately 19.5 trillion USD (Worldwide export trade volume 1950-2018). 
+Countries enter into economic transactions with one another whereby they are able to produce and export goods in which they have the comparative advantage and import goods that other countries have more efficient production in. Through trading, countries are able to take advantage of their different specialties, which leads to accelerated growth for their individual economies. But if everyone is happy with trade, why are we in a trade war with China?
 
 # Our Analysis
 
-In the United States, there's a widespread view that China is the major exporter, and the US the major importer in the global economy. But how much does China dominate the export market, and is the United States as big of a player in the import market as we think? In addition, are there natural divisions among countries in terms of trade volumes? What does the global trade network really look like? These are the questions we look to address. 
+Different countries will participate in world trade to a different extent, because some countries benefit more from trade than others. In the United States, there's a widespread view that China is the major exporter, and the US the major importer in the global economy. But how much does China dominate the export market, and is the United States as big of a player in the import market as we think? In addition, are there natural divisions among countries in terms of trade volumes? What does the global trade network really look like? These are the questions we look to address. 
 
-These questions all relate in some way to the distribution of trade worldwide. To get a broad overview, we look first at choropleths depicting share in total exports, and in total imports, by country. This gives us a preliminary understanding, not only of how countries relate to one another in terms of exports and imports, but also of how imports and exports relate within a particular country. We then move to the second question -- do natural groupings arise among countries based on trade volume? To explore this, we conduct a cluster analysis using k-means, which in turn forms the basis of a network analysis, where we look at how countries in these clusters interact, and which appear to be the most important.
+These questions all relate in some way to the distribution of trade worldwide, and to understand more about this, we will proceed in three steps. To get a broad overview, we will first look at choropleths depicting share in total exports, and in total imports, by country. This gives us a preliminary understanding, not only of how countries relate to one another in terms of exports and imports, but also of how imports and exports relate within a particular country. We then move to the second step where we conduct a cluster analysis using k-means algorithm to explore whether natural groupings arise among countries based on trade volume. This will form the basis for our third step: network analysis, where we look at how countries in these clusters interact, and which appear to be the most important.
 
 # Data Background
 
@@ -483,13 +483,18 @@ We added the visualizations using `visNetwork`, which takes as arguments the nod
 
 # Conclusion 
 
-Looking at the distribution of trade worldwide, we see that China, the United States, and Germany appear to dominate both with respect to exports and imports. China is by far responsible for the most exports, while the US is responsible for the most imports. Though in our initial maps, the rest of the world all looked fairly similar, we were actually able to identify three natural groups of countries based on trade volume -- high, medium, and low. As expected, China, Germany, and the United States are the sole members of the high trade volume category, with export and import volume far higher than the rest. 
+Looking at the distribution of trade worldwide, we see that China, the United States, and Germany appear to dominate both with respect to exports and imports. China is by far responsible for the most exports, while the US is responsible for the most imports. 
 
-Examining the trade relationships within clusters, we see a strong flow of goods and services from China to the United States -- by far the strongest relationship we identify overall. Even in the medium trade flow cluster, we are able to identify some strong relationships. Netherlands, Belgium-Luxembourg, France, and the UK seem to have high trade flow between them, as do Singapore and Malaysia. 
+Examining the trade relationships within clusters, we see a strong flow of goods and services from China to the United States -- by far the strongest relationship we identify overall. Seeing how the US import so much from China, you might be less surprised why so many items you found in your house have "made in China" slapped on it. 
+
+Even in the medium trade flow cluster, we are able to identify some strong relationships. Netherlands, Belgium-Luxembourg, France, and the UK seem to have high trade flow between them, as do Singapore and Malaysia. 
 
 Unfortunately, we were unable to visualize the last cluster due to its sheer size, which would have made a similar network visualization far too cluttered to be meaningful. As such, we are unable to provide an all-encompassing picture of international trade relations, which we would have liked to see. 
 
-# Citations (need to add in properly) 
+Another thing that we realize is that no African countries were included in the cluster 2 and 3, meaning that the continent did not participate too much in world trade. However, it would be interesting if we can see within the continent what the trade network looks like. 
+
+
+# Citations 
 
 - Department, P., &amp; 24, S. (2019, September 24). Worldwide export trade volume 1950-2018. Retrieved November 19, 2020, from https://www.statista.com/statistics/264682/worldwide-export-volume-in-the-trade-since-1950/
 
