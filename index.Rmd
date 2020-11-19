@@ -173,8 +173,13 @@ world$export_pct <- export_pct_named[world$names]
 mypalette <- colorNumeric(palette = "viridis", domain = world$export_pct, 
                            na.color = "transparent")
 
-# specify popup
-exportpopup <- paste0("Export Percentage: ", as.character(world$export_pct))
+# specify popup, and make percents easy to read
+export_prop_easy_read <- export_prop %>%
+    mutate(export_pct = round(export_pct, digits = 6))
+export_pct_named_easy_read <- export_prop_easy_read$export_pct
+names(export_pct_named_easy_read) <- export_prop_easy_read$exporter_name
+world$export_prop_easy_read <- export_pct_named_easy_read[world$names]
+exportpopup <- paste0(as.character(world$names), " Export Percentage: ", as.character(world$export_prop_easy_read))
 
 
 # interactive map 
@@ -200,8 +205,15 @@ names(import_pct_named) <- import_prop$importer_name
 
 world$import_pct <- import_pct_named[world$names]
 
-# specify popup
-importpopup <- paste0("Import Percentage: ", as.character(world$import_pct))
+# specify popup, and rounded
+import_prop_easy_read <- import_prop %>%
+    mutate(import_pct = round(import_pct, digits = 6))
+import_pct_named_easy_read <- import_prop_easy_read$import_pct
+names(import_pct_named_easy_read) <- import_prop_easy_read$importer_name
+world$import_prop_easy_read <- import_pct_named_easy_read[world$names]
+  
+importpopup <- paste0(as.character(world$names), " Import Percentage: ", as.character(world$import_prop_easy_read))
+
 
 # interactive map
 leaflet(world) %>%
@@ -284,13 +296,16 @@ ggplot(data = trade_combine_clust3, aes(x = import_pct, y = export_pct)) +
 
 From the graph above, we can see the large disparity between clusters, particularly with respect to the countries in cluster 2. These three countries contributed significantly more to world exports and imports than the rest of the other countries as they, on average, contribute 10% to world trade individually. 
 
-In cluster 3, the countries, on average, contribute close to 2.5% of total world trade, much lower than in cluster 2 but also much higher than cluster 1 which contains most of the countries in the world but each contributed negligibly in comparison to world trade. 
+In cluster 3, the countries, on average, contribute close to 2.5% of total world trade, much lower than in cluster 2 but also much higher than cluster 1 which contains most of the r funccountries in the world but each contributed negligibly in comparison to world trade. 
 
 ## Data Table 
 
 ```{r data table}
 datatable <- trade_combine_clust3 %>%
-  rename(Country = country, "Export Percent" = export_pct, "Import Percent" = import_pct, Cluster = clust3)
+  mutate(export_pct = round(export_pct, digits = 6)) %>%
+  mutate(import_pct = round(import_pct, digits = 6)) %>%
+  rename(Country = country, "Export Percent" = export_pct, "Import Percent" = import_pct, Cluster = clust3) %>%
+  select(Country, Cluster, "Export Percent", "Import Percent")
 reactable(datatable)
 ```
 
