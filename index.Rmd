@@ -138,9 +138,9 @@ world$names <- str_replace(world$names, pattern = ":.*$", replacement = "")
 
 Trade has been a quintessential component of human interaction since the dawn of history. In its simplest fashion we had the barter system -- the exchange of goods and services without the use of money. As society developed further, and we began to explore the concept of a 'nation' as a unit above the individual, the scope of trade found natural extensions to the international sphere. 
 
-In its early years, trade was thought of as quite competitive, and nations believed that if one were to increase their trade, this could only be done at the cost of another. Countries actively tried to dominate in terms of exports, but minimized imports, believing this would best protect their interests. This viewpoint was overturned with the advent of liberalism, and the idea that trade should be free. As a whole, we've gone back and forth between these ideas over the years, and landed somewhere in the middle -- free trade as far as possible, with trade agreements and global organizations to keep us all in line. 
+In its early years, trade was thought of as quite competitive, and nations believed that if one were to increase their trade, this could only be done at the cost of another. Countries actively tried to dominate in terms of exports, but minimized imports, believing this would best protect their interests. This viewpoint was overturned with the advent of liberalism, and the idea that trade should be free. As a whole, we've gone back and forth between these ideas over the years, and landed somewhere in the middle -- free trade as far as possible, with trade agreements and global organizations to keep us all in line (International trade 2020). 
 
-Now, international trade is an integral part of the global economy. Countries enter into economic transactions with one another whereby they are able to produce and export goods in which they have the comparative advantage and import goods that other countries have more efficient production in. Through trading, countries are able to take advantage of their different specialties, which leads to accelerated growth for their individual economies and financial markets. A long way from the barter system of old, international trade today is facilitated by large financial institutions, and in 2018 alone the total value of global exports was approximately 19.5 trillion USD. 
+Now, international trade is an integral part of the global economy. Countries enter into economic transactions with one another whereby they are able to produce and export goods in which they have the comparative advantage and import goods that other countries have more efficient production in. Through trading, countries are able to take advantage of their different specialties, which leads to accelerated growth for their individual economies and financial markets. A long way from the barter system of old, international trade today is facilitated by large financial institutions, and in 2018 alone the total value of global exports was approximately 19.5 trillion USD (Worldwide export trade volume 1950-2018). 
 
 # Our Analysis
 
@@ -150,7 +150,7 @@ These questions all relate in some way to the distribution of trade worldwide. T
 
 # Data Background
 
-The visualizations and analysis that follow are based on worldwide trade flow data taken from [CEPII](http://www.cepii.fr/CEPII/en/bdd_modele/presentation.asp?id=37), which incorporates yearly bilateral trades down to the product level. This data is directly taken from reports submitted to the United Nations Statistical Division, and includes variables such as year, product category, exporter, importer, value of the trade (in \$1,000), and lastly quantity (in metric tons). 
+The visualizations and analysis that follow are based on worldwide trade flow data taken from [CEPII](http://www.cepii.fr/CEPII/en/bdd_modele/presentation.asp?id=37), which incorporates yearly bilateral trades down to the product level. This data is directly taken from reports submitted to the United Nations Statistical Division, and includes variables such as year, product category, exporter, importer, value of the trade (in \$1,000), and lastly quantity (in metric tons) (Actualites du CEPII). 
 
 We restrict our focus particularly to the year 2017. Through grouping by exporter and importer and summing the value of trade, we are able to calculate trade volumes (in terms of value, for better comparison) between various different countries. We further use this to calculate a country's share in total exports and imports. 
 
@@ -257,8 +257,8 @@ for (i in 1:10){
 }
 
 ggplot(data = as.data.frame(fig), aes(x = V1, y = V2)) +
-  geom_point(color = "steelblue") +
-  geom_line(color = "steelblue") +
+  geom_point(color = "#438a8f") +
+  geom_line(color = "#438a8f") +
   scale_x_continuous(breaks=c(1:10)) +
   labs(title = "Within Group Sum of Squares vs. Number of Clusters",
        x = "Number of Clusters (k)", 
@@ -409,11 +409,20 @@ We can continue to extract insight from this network -- Korea, for example, seem
 
 Below is the code we used, where we wrote a function to take a data frame with exporting country, importing country, and total trade volume, and create the kind of network we just showed. We used the `visNetwork` package both to create the base network, as well as to add node and edge attributes, and interactive elements. 
 
-```{r, echo = T, eval = F}
-# function for an interactive network 
+To create our function, all of our code went inside of: 
+
+```
 make_network <- function(network) {
-  
-  # ensure that concatenating returns a factor
+
+}
+```
+
+`make_network` is the name we gave to the function, and `network`, as above, is a placeholder for the only argument it takes. This is a data frame with the necessary columns -- `exporter_name`, `importer_name`, and `total_trade`.
+
+In the body of the function, first we had to set up the network data so we could use it in the `visNetwork` function. We identified unique export-import pairs, and the total trade between them. We used this to create our nodes (countries) and edges (trade flows), with the edges weighted by the value of trade flow. 
+
+```
+# ensure that concatenating returns a factor
   c.factor <- function(..., recursive=TRUE) unlist(list(...), recursive=recursive)
   
   # identify all unique countries in the data (either exporting or importing)
@@ -430,7 +439,11 @@ make_network <- function(network) {
   
   # create nodes
   nodes <- data.frame(id = name_vec, label = name_vec, group = name_vec)
+```
 
+We added the visualizations using `visNetwork`, which takes as arguments the nodes and edges. We used `visNodes` and `visEdges` to modify nodes and edges respectively, and `visOptions` and `visInteraction` to add the interactive elements. 
+
+```
   # network visualizations
   visNetwork(nodes, edges, height = "500px", width = "100%")  %>% 
     visNodes(shape = "dot") %>%  
@@ -441,7 +454,6 @@ make_network <- function(network) {
     # add navigation buttons and allow multiple nodes to be selected at once
     visInteraction(navigationButtons = TRUE, multiselect = TRUE) %>%
   visLayout(randomSeed = 17)
-}
 ```
 
 # Conclusion 
@@ -454,8 +466,8 @@ Unfortunately, we were unable to visualize the last cluster due to its sheer siz
 
 # Citations (need to add in properly) 
 
-https://www.statista.com/statistics/264682/worldwide-export-volume-in-the-trade-since-1950/
+- Department, P., &amp; 24, S. (2019, September 24). Worldwide export trade volume 1950-2018. Retrieved November 19, 2020, from https://www.statista.com/statistics/264682/worldwide-export-volume-in-the-trade-since-1950/
 
-https://www.britannica.com/topic/international-trade
+- International trade. (2020, November 11). Retrieved November 19, 2020, from https://www.britannica.com/topic/international-trade
 
-http://www.cepii.fr/CEPII/en/bdd_modele/presentation.asp?id=37
+- Actualites du CEPII. (n.d.). Retrieved November 19, 2020, from http://www.cepii.fr/CEPII/en/bdd_modele/presentation.asp?id=37

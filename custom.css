@@ -8,9 +8,19 @@ h1, h2, h3, h4, h5, h6, legend {
 
 #main a {
   color: #438a8f;
+  background-image: linear-gradient(180deg,#438a8f,#438a8f);
 }
 
-.navbar-nav > .active > a { 
+#main .navbar-nav > .active > a { 
     background-color: #438a8f;
     color: white;
 }
+
+#main li.active a, li a:hover {
+  background-color: #438a8f !important;
+}
+
+code {
+  color: #438a8f;
+}
+
