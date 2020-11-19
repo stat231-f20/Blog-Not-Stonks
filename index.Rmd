@@ -223,6 +223,7 @@ leaflet(world) %>%
   addPolygons(color = "white", fillColor = ~mypalette(import_pct), weight = 1, label = importpopup) %>%
   addLegend(pal = mypalette, values = ~import_pct, 
             title = "Import Percent", position = "bottomleft")
+
 ```
 
 Here we look at the contributions of each country to total world imports, as a percentage. Once again, countries in gray correspond to those for which data were unavailable. We see that Germany, the United States, and China appear to be the major players. Interestingly, though China is the leading exporter in 2017, it is the United States that dominates with respect to imports, accounting for around 12\% of the global total. This might indicate an interesting relationship between these two countries, which we will explore in the clustering and network analyses. 
