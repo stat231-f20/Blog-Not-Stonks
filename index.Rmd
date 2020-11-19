@@ -28,6 +28,7 @@ library(visNetwork)
 library(rmarkdown)
 library(htmltools)
 library(reactable)
+library(plotly)
 
 knitr::opts_chunk$set(echo = TRUE, 
                       fig.align="center", 
@@ -293,6 +294,30 @@ ggplot(data = trade_combine_clust3, aes(x = import_pct, y = export_pct)) +
        y = "Percentage of Total Exports", 
        color = "Cluster Assignment:") + 
   theme(legend.position = "bottom")
+
+#attempt to make interactive
+#comment this out before presentation
+
+#trade_combine_clust3_character <- trade_combine_clust3 %>%
+#  mutate(country = as.character(country))
+#
+#
+#inter <- ggplot(data = trade_combine_clust3, aes(x = import_pct, y = export_pct, label = country)) + 
+#  geom_point(aes(color = clust3)) +
+#  coord_fixed() +
+#  geom_point(data = as.data.frame(km_trade$centers), aes(x = import_pct, y = export_pct),
+#             pch = "X", size = 4) +
+#  labs(title = "Three Cluster Solution",
+#       x = "Percentage of Total Imports", 
+#       y = "Percentage of Total Exports", 
+#       color = "Cluster Assignment:") + 
+#  theme(legend.position = "bottom")
+
+
+#countryname <- attemptoname$country
+
+#intgg <- ggplotly(inter)
+
 ```
 
 From the graph above, we can see the large disparity between clusters, particularly with respect to the countries in cluster 2. These three countries contributed significantly more to world exports and imports than the rest of the other countries as they, on average, contribute 10% to world trade individually. 
