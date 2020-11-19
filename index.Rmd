@@ -193,6 +193,8 @@ leaflet(world) %>%
             title = "Export Percent", position = "bottomleft")
 ```
 
+</br>
+
 The map above displays individual country contributions, as a percentage of total world export value. Countries in gray correspond to those for which we did not have data. As expected, China appears to dominate exports, accounting for around 14\% of total world exports. The United States and Germany also contribute significantly, with each contributing around 8\% of total world exports. However the rest of the countries seem to contribute very little individually, with most accounting for less than 2\% of global exports each. 
 
 ## Contribution to World Imports by Country 
@@ -227,7 +229,9 @@ leaflet(world) %>%
 
 ```
 
-Here we look at the contributions of each country to total world imports, as a percentage. Once again, countries in gray correspond to those for which data were unavailable. We see that Germany, the United States, and China appear to be the major players. Interestingly, though China is the leading exporter in 2017, it is the United States that dominates with respect to imports, accounting for around 12\% of the global total. This might indicate an interesting relationship between these two countries, which we will explore in the clustering and network analyses. 
+</br>
+
+Here we look at the contributions of each country to total world imports, as a percentage. Once again, countries in gray correspond to those for which data were unavailable. We see that Germany, the United States, and China appear to be the major players. Interestingly, though China is the leading exporter in 2017, it is the United States that dominates with respect to imports, accounting for around 13\% of the global total. This might indicate an interesting relationship between these two countries, which we will explore in the clustering and network analyses. 
 
 # Clustering {.tabset .tabset-fade .tabset-pills}
 
@@ -322,7 +326,7 @@ ggplot(data = trade_combine_clust3, aes(x = import_pct, y = export_pct)) +
 
 From the graph above, we can see the large disparity between clusters, particularly with respect to the countries in cluster 2. These three countries contributed significantly more to world exports and imports than the rest of the other countries as they, on average, contribute 10% to world trade individually. 
 
-In cluster 3, the countries, on average, contribute close to 2.5% of total world trade, much lower than in cluster 2 but also much higher than cluster 1 which contains most of the r funccountries in the world but each contributed negligibly in comparison to world trade. 
+In cluster 3, the countries, on average, contribute close to 2.5% of total world trade, much lower than in cluster 2 but also much higher than cluster 1 which contains most of the countries in the world but each contributed negligibly in comparison to world trade. 
 
 ## Data Table 
 
